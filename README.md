@@ -25,15 +25,20 @@ $ composer require cerbero/laravel-enum
 @todo Add explanation.
 
 ``` bash
-$ php artisan make:enum Progress ON_HOLD=On hold|IN_PROGRESS=In progress|COMPLETE=Complete
+$ php artisan make:enum Progress "ON_HOLD|IN_PROGRESS|COMPLETE"
+// default to lower case
 ```
 
 ``` bash
-$ php artisan make:enum PaymentGateway PAYPAL=PayPal=1|STRIPE=Stripe=2
+$ php artisan make:enum Progress "ON_HOLD=On hold|IN_PROGRESS=In progress|COMPLETE=Complete"
 ```
 
 ``` bash
-$ php artisan make:enum --path=app/Enums Status OFF=0|ON=1
+$ php artisan make:enum PaymentGateway "PAYPAL=PayPal=1|STRIPE=Stripe=2"
+```
+
+``` bash
+$ php artisan make:enum Status "OFF=0|ON=1" --path=app/Enums
 ```
 
 
