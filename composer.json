@@ -1,5 +1,5 @@
 {
-    "name": "cerbero90/laravel-enum",
+    "name": "cerbero/laravel-enum",
     "type": "library",
     "description": "Enum generator for Laravel.",
     "keywords": [
@@ -18,9 +18,13 @@
         }
     ],
     "require": {
-        "php": "~7.1"
+        "php": "~7.1",
+        "illuminate/console": "^5.8",
+        "illuminate/support": "^5.8",
+        "rexlabs/enum": "^2.0"
     },
     "require-dev": {
+        "orchestra/testbench": "^3.8",
         "phpunit/phpunit": ">=7.0",
         "squizlabs/php_codesniffer": "^3.0"
     },
@@ -42,6 +46,11 @@
     "extra": {
         "branch-alias": {
             "dev-master": "1.0-dev"
+        },
+        "laravel": {
+            "providers": [
+                "Cerbero\\LaravelEnum\\Providers\\LaravelEnumServiceProvider"
+            ]
         }
     },
     "config": {
