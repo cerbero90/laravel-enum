@@ -40,8 +40,8 @@ class Parser
     {
         return tap(new EnumDefinition, function ($enumDefinition) use ($parts) {
             $enumDefinition->name = $parts[0];
-            $enumDefinition->key = $this->parseValue($parts[1] ?? Str::lower($parts[0]));
-            $enumDefinition->value = $this->parseValue($parts[2] ?? null);
+            $enumDefinition->key = isset($parts[1]) ? $this->parseValue($parts[1]) : Str::lower($parts[0]);
+            $enumDefinition->value = isset($parts[2]) ? $this->parseValue($parts[2]) : null;
         });
     }
 
@@ -51,7 +51,7 @@ class Parser
      * @param mixed $value
      * @return mixed
      */
-    private function parseValue($value)
+    public function parseValue($value)
     {
         if ($value === null || $value === '') {
             return null;

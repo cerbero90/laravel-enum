@@ -18,14 +18,14 @@ class EnumDefinition
     /**
      * The key of the enum.
      *
-     * @var string
+     * @var mixed
      */
     public $key;
 
     /**
      * The value of the enum.
      *
-     * @var string
+     * @var mixed
      */
     public $value;
 }
