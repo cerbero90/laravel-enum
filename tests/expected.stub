@@ -9,11 +9,13 @@ use Rexlabs\Enum\Enum;
  *
  * @method static self FIRST_ENUM()
  * @method static self SECOND_ENUM()
+ * @method static self THIRD_ENUM()
  */
 class DummyClass extends Enum
 {
     const FIRST_ENUM = 'first_enum';
-    const SECOND_ENUM = [
+    const SECOND_ENUM = 1;
+    const THIRD_ENUM = [
         'foo' => 'bar',
     ];
 
@@ -26,7 +28,8 @@ class DummyClass extends Enum
     {
         return [
             static::FIRST_ENUM => null,
-            static::SECOND_ENUM => [
+            static::SECOND_ENUM => true,
+            static::THIRD_ENUM => [
                 'foo' => [
                     'bar' => 'baz',
                 ],

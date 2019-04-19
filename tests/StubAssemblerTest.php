@@ -22,13 +22,19 @@ class StubAssemblerTest extends TestCase
 
         $enum2 = tap(new EnumDefinition, function (EnumDefinition $enumDefinition) {
             $enumDefinition->name = 'SECOND_ENUM';
+            $enumDefinition->key = 1;
+            $enumDefinition->value = true;
+        });
+
+        $enum3 = tap(new EnumDefinition, function (EnumDefinition $enumDefinition) {
+            $enumDefinition->name = 'THIRD_ENUM';
             $enumDefinition->key = ['foo' => 'bar'];
             $enumDefinition->value = ['foo' => ['bar' => 'baz']];
         });
 
         $expected = file_get_contents(__DIR__ . '/expected.stub');
         $stub = file_get_contents(__DIR__ . '/../stubs/enum.stub');
-        $actual = (new StubAssembler($stub, [$enum1, $enum2]))
+        $actual = (new StubAssembler($stub, [$enum1, $enum2, $enum3]))
             ->replaceMethodTags()
             ->replaceConstants()
             ->replaceMap()
