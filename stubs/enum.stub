@@ -1,0 +1,15 @@
+<?php
+
+namespace DummyNamespace;
+
+use Rexlabs\Enum\Enum;
+
+/**
+ * The DummyClass enum.
+ *
+DummyMethodTags
+ */
+class DummyClass extends Enum
+{
+DummyConstantsDummyMap
+}

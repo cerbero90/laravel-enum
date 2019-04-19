@@ -1,0 +1,13 @@
+
+
+    /**
+     * Retrieve a map of enum keys and values.
+     *
+     * @return array
+     */
+    public static function map() : array
+    {
+        return [
+DummyKeyValuePairs
+        ];
+    }
