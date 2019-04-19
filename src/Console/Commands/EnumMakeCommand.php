@@ -96,7 +96,9 @@ class EnumMakeCommand extends GeneratorCommand
      */
     private function parseEnums() : array
     {
-        $definition = trim($this->argument('enum'));
+        // Normalise definition as argument() may return an array
+        $enum = (array) $this->argument('enum');
+        $definition = trim($enum[0]);
 
         return (new Parser)->parseDefinition($definition);
     }
