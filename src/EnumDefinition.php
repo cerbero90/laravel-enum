@@ -1,6 +1,6 @@
 <?php
 
-namespace Cerbero\LaravelEnum\Parsers;
+namespace Cerbero\LaravelEnum;
 
 /**
  * The enum definition.

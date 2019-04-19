@@ -1,6 +1,6 @@
 <?php
 
-namespace Cerbero\LaravelEnum\Parsers;
+namespace Cerbero\LaravelEnum;
 
 use Illuminate\Support\Str;
 
