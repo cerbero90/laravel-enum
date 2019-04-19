@@ -1,0 +1,36 @@
+<?php
+
+namespace DummyNamespace;
+
+use Rexlabs\Enum\Enum;
+
+/**
+ * The DummyClass enum.
+ *
+ * @method static self FIRST_ENUM()
+ * @method static self SECOND_ENUM()
+ */
+class DummyClass extends Enum
+{
+    const FIRST_ENUM = 'first_enum';
+    const SECOND_ENUM = [
+        'foo' => 'bar',
+    ];
+
+    /**
+     * Retrieve a map of enum keys and values.
+     *
+     * @return array
+     */
+    public static function map() : array
+    {
+        return [
+            static::FIRST_ENUM => null,
+            static::SECOND_ENUM => [
+                'foo' => [
+                    'bar' => 'baz',
+                ],
+            ],
+        ];
+    }
+}
