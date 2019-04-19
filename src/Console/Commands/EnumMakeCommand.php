@@ -3,8 +3,9 @@
 namespace Cerbero\LaravelEnum\Console\Commands;
 
 use Illuminate\Console\GeneratorCommand;
-use Cerbero\LaravelEnum\Parsers\Parser;
-use Cerbero\LaravelEnum\Parsers\EnumDefinition;
+use Illuminate\Support\Str;
+use Cerbero\LaravelEnum\StubAssembler;
+use Cerbero\LaravelEnum\Parser;
 
 /**
  * The Artisan command to generate Enum classes.
@@ -17,7 +18,11 @@ class EnumMakeCommand extends GeneratorCommand
      *
      * @var string
      */
-    protected $signature = 'make:enum {name} {enum : The enum definition} {--p|path= : The path to generate enums in}';
+    protected $signature = 'make:enum
+                            {name : The name of the class}
+                            {enum : The definition of the enum}
+                            {--p|path= : The path to generate enums in}
+                            {--f|force : Create the class even if the enum already exists}';
 
     /**
      * The console command description.
@@ -44,6 +49,28 @@ class EnumMakeCommand extends GeneratorCommand
     }
 
     /**
+     * Get the default namespace for the class.
+     *
+     * @param  string  $rootNamespace
+     * @return string
+     */
+    protected function getDefaultNamespace($rootNamespace)
+    {
+        if ($path = $this->option('path')) {
+            // Ensure the path starts with "app/"
+            $path = Str::start(ltrim($path, '/'), 'app/');
+            // Remove "app/" from the beginning of the path
+            $path = preg_replace('#^app\/#', '', $path);
+            // Convert the path into namespace
+            $namespace = implode('\\', array_map('ucfirst', explode('/', $path)));
+            // Prepend the root namespace
+            return $rootNamespace . '\\' . $namespace;
+        }
+
+        return $rootNamespace . '\Enums';
+    }
+
+    /**
      * Build the class with the given name.
      *
      * @param  string  $name
@@ -52,13 +79,14 @@ class EnumMakeCommand extends GeneratorCommand
      */
     protected function buildClass($name)
     {
-        return tap(parent::buildClass($name), function (&$stub) {
-            $enums = $this->parseEnums();
+        $stub = parent::buildClass($name);
+        $enums = $this->parseEnums();
 
-            $this->replaceMethodTags($stub, $enums);
-            $this->replaceConstants($stub, $enums);
-            $this->replaceMap($stub, $enums);
-        });
+        return (new StubAssembler($stub, $enums))
+            ->replaceMethodTags()
+            ->replaceConstants()
+            ->replaceMap()
+            ->getStub();
     }
 
     /**
@@ -71,89 +99,5 @@ class EnumMakeCommand extends GeneratorCommand
         $definition = trim($this->argument('enum'));
 
         return (new Parser)->parseDefinition($definition);
-    }
-
-    /**
-     * Replace the PHPDoc method tags for the given stub
-     *
-     * @param string $stub
-     * @return void
-     */
-    private function replaceMethodTags(string &$stub, array $enums) : void
-    {
-        $methods = array_map(function ($enum) {
-            return " * @method static self {$enum->name}()";
-        }, $enums);
-
-        $stub = str_replace('DummyMethodTags', implode(PHP_EOL, $methods), $stub);
-    }
-
-    /**
-     * Replace the constants for the given stub
-     *
-     * @param string $stub
-     * @return void
-     */
-    private function replaceConstants(string &$stub, array $enums) : void
-    {
-        $constants = array_map(function ($enum) {
-            ///////////// @todo check out what happens when key is array - may need to format it
-            $key = is_string($enum->key) ? "'{$enum->key}'" : $enum->key;
-            return "    const {$enum->name} = {$key};";
-        }, $enums);
-
-        $stub = str_replace('DummyConstants', implode(PHP_EOL, $constants), $stub);
-    }
-
-    /**
-     * Replace the map for the given stub
-     *
-     * @param string $stub
-     * @return void
-     */
-    private function replaceMap(string &$stub, array $enums) : void
-    {
-        // Map enums key and value pairs only if enums have values
-        if ($this->enumsHaveValues($enums)) {
-            $mapStub = __DIR__ . '/../../../stubs/map.stub';
-            $stub = str_replace('DummyMap', file_get_contents($mapStub), $stub);
-            $this->replaceMapPairs($stub, $enums);
-        } else {
-            $stub = str_replace('DummyMap', '', $stub);
-        }
-    }
-
-    /**
-     * Determine whether the given enums contain values
-     *
-     * @param array $enums
-     * @return bool
-     */
-    private function enumsHaveValues(array $enums) : bool
-    {
-        //////////// consider using Enum classes instead of EnumDefinition
-        foreach ($enums as $enum) {
-            if ($enum->value !== null) {
-                return true;
-            }
-        }
-
-        return false;
-    }
-
-    /**
-     * Replace the enums key and value pairs
-     *
-     * @param string $stub
-     * @param array $enums
-     * @return void
-     */
-    private function replaceMapPairs(string &$stub, array $enums) : void
-    {
-        $pairs = array_map(function ($enum) {
-            return "            static::{$enum->name} => {$enum->value},";
-        }, $enums);
-
-        $stub = str_replace('DummyKeyValuePairs', implode(PHP_EOL, $pairs), $stub);
     }
 }
