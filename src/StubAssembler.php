@@ -8,6 +8,8 @@ namespace Cerbero\LaravelEnum;
  */
 class StubAssembler
 {
+    use ExportsValues;
+
     /**
      * The stub to assemble.
      *
@@ -77,46 +79,6 @@ class StubAssembler
         $this->stub = str_replace('DummyConstants', implode(PHP_EOL, $constants), $this->stub);
 
         return $this;
-    }
-
-    /**
-     * Format the given item to an exportable string.
-     *
-     * @param mixed $item
-     * @param int $initialPadding
-     * @param int $incrementalPadding
-     * @return mixed
-     */
-    private function export($item, int $initialPadding = 0, int $incrementalPadding = 4)
-    {
-        if (is_null($item)) {
-            return 'null';
-        }
-
-        if (is_bool($item)) {
-            return $item ? 'true' : 'false';
-        }
-
-        if (is_string($item)) {
-            return "'{$item}'";
-        }
-
-        if (!is_array($item)) {
-            return $item;
-        }
-
-        // Format arrays with squared brackets and custom indentation
-        $padding = $initialPadding + $incrementalPadding;
-        $indentation = str_repeat(' ', $padding);
-        $exported = [];
-
-        foreach ($item as $key => $value) {
-            $exportedKey = is_int($key) ? '' : "'{$key}' => ";
-            $exportedValue = $this->export($value, $padding, $incrementalPadding);
-            $exported[] = $indentation . $exportedKey . $exportedValue;
-        }
-
-        return "[\n" . implode(",\n", $exported) . ",\n" . str_repeat(' ', $initialPadding) . ']';
     }
 
     /**
