@@ -56,7 +56,7 @@ class Status extends Enum
 Nonetheless you may need to define your own keys, that is possible by pairing constant names and keys with an `=` character:
 
 ``` bash
-$ php artisan make:enum Status 'IN_PROGRESS=In progress|COMPLETE=Complete|FAILED=Failed'
+$ php artisan make:enum Status 'IN_PROGRESS=1|COMPLETE=2|FAILED=3'
 ```
 
 The command above will generate the following `Progress` enum:
@@ -77,16 +77,16 @@ use Rexlabs\Enum\Enum;
  */
 class Status extends Enum
 {
-    const IN_PROGRESS = 'In progress';
-    const COMPLETE = 'Complete';
-    const FAILED = 'Failed';
+    const IN_PROGRESS = 1;
+    const COMPLETE = 2;
+    const FAILED = 3;
 }
 ```
 
 Similarly you can specify enum values by pairing keys and values with an `=` character:
 
 ``` bash
-$ php artisan make:enum Status 'IN_PROGRESS=In progress=0|COMPLETE=Complete=1|FAILED=Failed=2'
+$ php artisan make:enum Status 'IN_PROGRESS=1=In progress|COMPLETE=2=Complete|FAILED=3=Failed'
 ```
 
 The above command will generate the following `Status` enum and implement the `map()` method:
@@ -107,9 +107,9 @@ use Rexlabs\Enum\Enum;
  */
 class Status extends Enum
 {
-    const IN_PROGRESS = 'In progress';
-    const COMPLETE = 'Complete';
-    const FAILED = 'Failed';
+    const IN_PROGRESS = 1;
+    const COMPLETE = 2;
+    const FAILED = 3;
 
     /**
      * Retrieve a map of enum keys and values.
@@ -119,9 +119,9 @@ class Status extends Enum
     public static function map() : array
     {
         return [
-            static::IN_PROGRESS => 0,
-            static::COMPLETE => 1,
-            static::FAILED => 2,
+            static::IN_PROGRESS => 'In progress',
+            static::COMPLETE => 'Complete',
+            static::FAILED => 'Failed',
         ];
     }
 }
@@ -130,7 +130,7 @@ class Status extends Enum
 Sometimes you may want to define array of values in your keys or values, you can do that by providing JSON strings:
 
 ``` bash
-$ php artisan make:enum Status 'NAMES={"in_progress":"In progress","complete":"Complete"}={"In progress":"in_progress","Complete":"complete"}'
+$ php artisan make:enum Status 'NAMES={"in_progress":"In progress","complete":"Complete"}'
 ```
 
 This package will take care of building, indenting and formatting the array for you:
@@ -153,21 +153,6 @@ class Status extends Enum
         'in_progress' => 'In progress',
         'complete' => 'Complete',
     ];
-
-    /**
-     * Retrieve a map of enum keys and values.
-     *
-     * @return array
-     */
-    public static function map() : array
-    {
-        return [
-            static::NAMES => [
-                'In progress' => 'in_progress',
-                'Complete' => 'complete',
-            ],
-        ];
-    }
 }
 ```
 
