@@ -38,6 +38,16 @@ class EnumMakeCommandTest extends TestCase
     /**
      * @test
      */
+    public function oneKeyGenerationOption()
+    {
+        $this->expectExceptionMessage('Only one option of "numeric" or "bitwise" can be set');
+
+        $this->artisan('make:enum Test TEST --numeric --bitwise');
+    }
+
+    /**
+     * @test
+     */
     public function generateEnum()
     {
         $this->artisan('make:enum Test TEST')->assertExitCode(0);
