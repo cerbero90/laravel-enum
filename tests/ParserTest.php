@@ -152,6 +152,94 @@ class ParserTest extends TestCase
     /**
      * @test
      */
+    public function parseNumericDefinition()
+    {
+        $definition = 'ONE|TWO|THREE';
+        $expectedNames = ['ONE', 'TWO', 'THREE'];
+        $expectedKeys = [1, 2, 3];
+
+        $enums = $this->parser->parseDefinition($definition, true);
+
+        $this->assertIsArray($enums);
+        $this->assertCount(3, $enums);
+
+        for ($i = 0; $i < count($enums); $i++) {
+            $this->assertInstanceOf(EnumDefinition::class, $enums[$i]);
+            $this->assertSame($expectedNames[$i], $enums[$i]->name);
+            $this->assertSame($expectedKeys[$i], $enums[$i]->key);
+        }
+    }
+
+    /**
+     * @test
+     */
+    public function parseNumericDefinitionWithValues()
+    {
+        $definition = 'ONE=Number One|TWO=Number Two|THREE=Number Three';
+        $expectedNames = ['ONE', 'TWO', 'THREE'];
+        $expectedKeys = [1, 2, 3];
+        $expectedValues = ['Number One', 'Number Two', 'Number Three'];
+
+        $enums = $this->parser->parseDefinition($definition, true);
+
+        $this->assertIsArray($enums);
+        $this->assertCount(3, $enums);
+
+        for ($i = 0; $i < count($enums); $i++) {
+            $this->assertInstanceOf(EnumDefinition::class, $enums[$i]);
+            $this->assertSame($expectedNames[$i], $enums[$i]->name);
+            $this->assertSame($expectedKeys[$i], $enums[$i]->key);
+            $this->assertSame($expectedValues[$i], $enums[$i]->value);
+        }
+    }
+
+    /**
+     * @test
+     */
+    public function parseBitwiseDefinition()
+    {
+        $definition = 'ONE|TWO|FOUR|EIGHT';
+        $expectedNames = ['ONE', 'TWO', 'FOUR', 'EIGHT'];
+        $expectedKeys = [1, 2, 4, 8];
+
+        $enums = $this->parser->parseDefinition($definition, false, true);
+
+        $this->assertIsArray($enums);
+        $this->assertCount(4, $enums);
+
+        for ($i = 0; $i < count($enums); $i++) {
+            $this->assertInstanceOf(EnumDefinition::class, $enums[$i]);
+            $this->assertSame($expectedNames[$i], $enums[$i]->name);
+            $this->assertSame($expectedKeys[$i], $enums[$i]->key);
+        }
+    }
+
+    /**
+     * @test
+     */
+    public function parseBitwiseDefinitionWithValues()
+    {
+        $definition = 'ONE=0b0001|TWO=0b0010|FOUR=0b0100|EIGHT=0b1000';
+        $expectedNames = ['ONE', 'TWO', 'FOUR', 'EIGHT'];
+        $expectedKeys = [1, 2, 4, 8];
+        $expectedValues = ['0b0001', '0b0010', '0b0100', '0b1000'];
+
+        $enums = $this->parser->parseDefinition($definition, false, true);
+
+        $this->assertIsArray($enums);
+        $this->assertCount(4, $enums);
+
+        for ($i = 0; $i < count($enums); $i++) {
+            $this->assertInstanceOf(EnumDefinition::class, $enums[$i]);
+            $this->assertSame($expectedNames[$i], $enums[$i]->name);
+            $this->assertSame($expectedKeys[$i], $enums[$i]->key);
+            $this->assertSame($expectedValues[$i], $enums[$i]->value);
+        }
+    }
+
+    /**
+     * @test
+     */
     public function parseNullables()
     {
         $actual1 = $this->parser->parseValue(null);

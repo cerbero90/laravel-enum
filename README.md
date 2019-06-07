@@ -59,7 +59,7 @@ Nonetheless you may need to define your own keys, that is possible by pairing co
 $ php artisan make:enum Status 'IN_PROGRESS=1|COMPLETE=2|FAILED=3'
 ```
 
-The command above will generate the following `Progress` enum:
+The command above will generate the following `Status` enum:
 
 ``` php
 <?php
@@ -122,6 +122,85 @@ class Status extends Enum
             static::IN_PROGRESS => 'In progress',
             static::COMPLETE => 'Complete',
             static::FAILED => 'Failed',
+        ];
+    }
+}
+```
+
+You may also automatically generate numeric or bitwise keys by adding the `--numeric` or `--bitwise` option.
+
+``` bash
+$ php artisan make:enum Status 'IN_PROGRESS=1|COMPLETE=2|FAILED=3'
+$ php artisan make:enum Status 'IN_PROGRESS|COMPLETE|FAILED --numeric'
+```
+
+The above commands will both generate the following `Status` enums:
+
+``` php
+<?php
+
+namespace App\Enums;
+
+use Rexlabs\Enum\Enum;
+
+/**
+ * The Status enum.
+ *
+ * @method static self IN_PROGRESS()
+ * @method static self COMPLETE()
+ * @method static self FAILED()
+ */
+class Status extends Enum
+{
+    const IN_PROGRESS = 1;
+    const COMPLETE = 2;
+    const FAILED = 3;
+}
+```
+
+You can also specify enum values by pairing the constant names and keys with an `=` character.
+
+``` bash
+$ php artisan make:enum JSON 'HEX_TAG=Hex Tag=1|HEX_AMP=Hex Amp=2|HEX_APOS=Hex Apos=4|HEX_QUOT=Hex Quot=8'
+$ php artisan make:enum JSON 'HEX_TAG=Hex Tag|HEX_AMP=Hex Amp|HEX_APOS=Hex Apos|HEX_QUOT=Hex Quot --bitwise'
+```
+
+The above commands will both generate the following `JSON` enum and implement the `map()` method:
+
+``` php
+<?php
+
+namespace App\Enums;
+
+use Rexlabs\Enum\Enum;
+
+/**
+ * The JSON enum.
+ *
+ * @method static self HEX_TAG()
+ * @method static self HEX_AMP()
+ * @method static self HEX_APOS()
+ * @method static self HEX_QUOT()
+ */
+class JSON extends Enum
+{
+    const HEX_TAG = 1;
+    const HEX_AMP = 2;
+    const HEX_APOS = 4;
+    const HEX_QUOT = 8;
+
+    /**
+     * Retrieve a map of enum keys and values.
+     *
+     * @return array
+     */
+    public static function map() : array
+    {
+        return [
+            static::HEX_TAG => 'Hex Tag',
+            static::HEX_AMP => 'Hex Amp',
+            static::HEX_APOS => 'Hex Apos',
+            static::HEX_QUOT => 'Hex Quot',
         ];
     }
 }
