@@ -127,14 +127,13 @@ class Status extends Enum
 }
 ```
 
-You may also automatically generate numeric or bitwise keys by adding the `--numeric` or `--bitwise` option.
+Sometimes you may want to define array of values in your keys or values, you can do that by providing JSON strings:
 
 ``` bash
-$ php artisan make:enum Status 'IN_PROGRESS=1|COMPLETE=2|FAILED=3'
-$ php artisan make:enum Status 'IN_PROGRESS|COMPLETE|FAILED --numeric'
+$ php artisan make:enum Status 'NAMES={"in_progress":"In progress","complete":"Complete"}'
 ```
 
-The above commands will both generate the following `Status` enums:
+This package will take care of building, indenting and formatting the array for you:
 
 ``` php
 <?php
@@ -146,26 +145,47 @@ use Rexlabs\Enum\Enum;
 /**
  * The Status enum.
  *
- * @method static self IN_PROGRESS()
- * @method static self COMPLETE()
- * @method static self FAILED()
+ * @method static self NAMES()
  */
 class Status extends Enum
 {
-    const IN_PROGRESS = 1;
-    const COMPLETE = 2;
-    const FAILED = 3;
+    const NAMES = [
+        'in_progress' => 'In progress',
+        'complete' => 'Complete',
+    ];
 }
 ```
 
-You can also specify enum values by pairing the constant names and keys with an `=` character.
+You may also generate keys without the need to define them by using the `--keys` option:
+
+- `--keys=bitwise` generates bitwise keys (1, 2, 4, 8...)
+- `--keys=int0` generates 0-indexed integer keys (1, 2, 3, 4...)
+- `--keys=int1` generates 1-indexed integer keys (0, 1, 2, 3...)
+- `--keys=lower` generates keys by converting constant names to lower case
+
+The following paired commands generate the same Enum class:
 
 ``` bash
-$ php artisan make:enum JSON 'HEX_TAG=Hex Tag=1|HEX_AMP=Hex Amp=2|HEX_APOS=Hex Apos=4|HEX_QUOT=Hex Quot=8'
-$ php artisan make:enum JSON 'HEX_TAG=Hex Tag|HEX_AMP=Hex Amp|HEX_APOS=Hex Apos|HEX_QUOT=Hex Quot --bitwise'
+$ php artisan make:enum Status 'IN_PROGRESS=1|COMPLETE=2|FAILED=4'
+$ php artisan make:enum Status 'IN_PROGRESS|COMPLETE|FAILED' --keys=bitwise
+
+$ php artisan make:enum Status 'IN_PROGRESS=0|COMPLETE=1|FAILED=2'
+$ php artisan make:enum Status 'IN_PROGRESS|COMPLETE|FAILED' --keys=int0
+
+$ php artisan make:enum Status 'IN_PROGRESS=1|COMPLETE=2|FAILED=3'
+$ php artisan make:enum Status 'IN_PROGRESS|COMPLETE|FAILED' --keys=int1
+
+$ php artisan make:enum Status 'IN_PROGRESS=in_progress|COMPLETE=complete|FAILED=failed'
+$ php artisan make:enum Status 'IN_PROGRESS|COMPLETE|FAILED' --keys=lower
 ```
 
-The above commands will both generate the following `JSON` enum and implement the `map()` method:
+When `--keys` is provided, you may define enum values by pairing names and values with an `=` character:
+
+``` bash
+$ php artisan make:enum JSON 'HEX_TAG=Hex Tag|HEX_AMP=Hex Amp|HEX_APOS=Hex Apos|HEX_QUOT=Hex Quot' --keys=bitwise
+```
+
+The command above will generate the following `JSON` enum:
 
 ``` php
 <?php
@@ -203,35 +223,6 @@ class JSON extends Enum
             static::HEX_QUOT => 'Hex Quot',
         ];
     }
-}
-```
-
-Sometimes you may want to define array of values in your keys or values, you can do that by providing JSON strings:
-
-``` bash
-$ php artisan make:enum Status 'NAMES={"in_progress":"In progress","complete":"Complete"}'
-```
-
-This package will take care of building, indenting and formatting the array for you:
-
-``` php
-<?php
-
-namespace App\Enums;
-
-use Rexlabs\Enum\Enum;
-
-/**
- * The Status enum.
- *
- * @method static self NAMES()
- */
-class Status extends Enum
-{
-    const NAMES = [
-        'in_progress' => 'In progress',
-        'complete' => 'Complete',
-    ];
 }
 ```
 
