@@ -6,7 +6,7 @@ use Illuminate\Console\GeneratorCommand;
 use Illuminate\Support\Str;
 use Cerbero\LaravelEnum\StubAssembler;
 use Cerbero\LaravelEnum\Parser;
-use Symfony\Component\Console\Exception\InvalidArgumentException;
+use Cerbero\LaravelEnum\Keys;
 
 /**
  * The Artisan command to generate Enum classes.
@@ -22,8 +22,7 @@ class EnumMakeCommand extends GeneratorCommand
     protected $signature = 'make:enum
                             {name : The name of the class}
                             {enum : The definition of the enum}
-                            {--numeric : Create a numeric enum}
-                            {--bitwise : Create a bitwise enum}
+                            {--k|keys= : The type of keys to generate if not defined}
                             {--p|path= : The path to generate enums in}
                             {--f|force : Create the class even if the enum already exists}';
 
@@ -49,21 +48,6 @@ class EnumMakeCommand extends GeneratorCommand
     protected function getStub()
     {
         return __DIR__ . '/../../../stubs/enum.stub';
-    }
-
-    /**
-     * Execute the console command.
-     *
-     * @return bool|null
-     * @throws \Illuminate\Contracts\Filesystem\FileNotFoundException
-     */
-    public function handle()
-    {
-        if ($this->option('numeric') && $this->option('bitwise')) {
-            throw new InvalidArgumentException('Only one option of "numeric" or "bitwise" can be set');
-        }
-
-        return parent::handle();
     }
 
     /**
@@ -117,7 +101,22 @@ class EnumMakeCommand extends GeneratorCommand
         // Normalise definition as argument() may return an array
         $enum = (array) $this->argument('enum');
         $definition = trim($enum[0]);
+        $keys = $this->getKeys();
 
-        return (new Parser)->parseDefinition($definition, $this->option('numeric'), $this->option('bitwise'));
+        return (new Parser)->parseDefinition($definition, $keys);
+    }
+
+    /**
+     * Retrieve the keys to generate
+     *
+     * @return \Cerbero\LaravelEnum\Keys|null
+     */
+    private function getKeys() : ?Keys
+    {
+        if ($key = $this->option('keys')) {
+            return Keys::instanceFromKey($key);
+        }
+
+        return null;
     }
 }
