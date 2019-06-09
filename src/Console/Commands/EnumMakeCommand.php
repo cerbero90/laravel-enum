@@ -6,6 +6,9 @@ use Illuminate\Console\GeneratorCommand;
 use Illuminate\Support\Str;
 use Cerbero\LaravelEnum\StubAssembler;
 use Cerbero\LaravelEnum\Parser;
+use Cerbero\LaravelEnum\Keys;
+use Rexlabs\Enum\Exceptions\InvalidKeyException;
+use Symfony\Component\Console\Exception\InvalidArgumentException;
 
 /**
  * The Artisan command to generate Enum classes.
@@ -21,6 +24,7 @@ class EnumMakeCommand extends GeneratorCommand
     protected $signature = 'make:enum
                             {name : The name of the class}
                             {enum : The definition of the enum}
+                            {--k|keys= : The type of keys to generate if not defined}
                             {--p|path= : The path to generate enums in}
                             {--f|force : Create the class even if the enum already exists}';
 
@@ -99,7 +103,27 @@ class EnumMakeCommand extends GeneratorCommand
         // Normalise definition as argument() may return an array
         $enum = (array) $this->argument('enum');
         $definition = trim($enum[0]);
+        $keys = $this->getKeys();
 
-        return (new Parser)->parseDefinition($definition);
+        return (new Parser)->parseDefinition($definition, $keys);
+    }
+
+    /**
+     * Retrieve the keys to generate
+     *
+     * @return \Cerbero\LaravelEnum\Keys|null
+     */
+    private function getKeys() : ?Keys
+    {
+        if (null === $key = $this->option('keys')) {
+            return null;
+        }
+
+        try {
+            return Keys::instanceFromKey($key);
+        } catch (InvalidKeyException $e) {
+            $keys = implode(', ', Keys::keys());
+            throw new InvalidArgumentException("Invalid type provided for keys. Allowed keys: {$keys}");
+        }
     }
 }

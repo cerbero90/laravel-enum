@@ -59,7 +59,7 @@ Nonetheless you may need to define your own keys, that is possible by pairing co
 $ php artisan make:enum Status 'IN_PROGRESS=1|COMPLETE=2|FAILED=3'
 ```
 
-The command above will generate the following `Progress` enum:
+The command above will generate the following `Status` enum:
 
 ``` php
 <?php
@@ -153,6 +153,76 @@ class Status extends Enum
         'in_progress' => 'In progress',
         'complete' => 'Complete',
     ];
+}
+```
+
+You may also generate keys without the need to define them by using the `--keys` option:
+
+- `--keys=bitwise` generates bitwise keys (1, 2, 4, 8...)
+- `--keys=int0` generates 0-indexed integer keys (1, 2, 3, 4...)
+- `--keys=int1` generates 1-indexed integer keys (0, 1, 2, 3...)
+- `--keys=lower` generates keys by converting constant names to lower case
+
+The following paired commands generate the same Enum class:
+
+``` bash
+$ php artisan make:enum Status 'IN_PROGRESS=1|COMPLETE=2|FAILED=4'
+$ php artisan make:enum Status 'IN_PROGRESS|COMPLETE|FAILED' --keys=bitwise
+
+$ php artisan make:enum Status 'IN_PROGRESS=0|COMPLETE=1|FAILED=2'
+$ php artisan make:enum Status 'IN_PROGRESS|COMPLETE|FAILED' --keys=int0
+
+$ php artisan make:enum Status 'IN_PROGRESS=1|COMPLETE=2|FAILED=3'
+$ php artisan make:enum Status 'IN_PROGRESS|COMPLETE|FAILED' --keys=int1
+
+$ php artisan make:enum Status 'IN_PROGRESS=in_progress|COMPLETE=complete|FAILED=failed'
+$ php artisan make:enum Status 'IN_PROGRESS|COMPLETE|FAILED' --keys=lower
+```
+
+When `--keys` is provided, you may define enum values by pairing names and values with an `=` character:
+
+``` bash
+$ php artisan make:enum JSON 'HEX_TAG=Hex Tag|HEX_AMP=Hex Amp|HEX_APOS=Hex Apos|HEX_QUOT=Hex Quot' --keys=bitwise
+```
+
+The command above will generate the following `JSON` enum:
+
+``` php
+<?php
+
+namespace App\Enums;
+
+use Rexlabs\Enum\Enum;
+
+/**
+ * The JSON enum.
+ *
+ * @method static self HEX_TAG()
+ * @method static self HEX_AMP()
+ * @method static self HEX_APOS()
+ * @method static self HEX_QUOT()
+ */
+class JSON extends Enum
+{
+    const HEX_TAG = 1;
+    const HEX_AMP = 2;
+    const HEX_APOS = 4;
+    const HEX_QUOT = 8;
+
+    /**
+     * Retrieve a map of enum keys and values.
+     *
+     * @return array
+     */
+    public static function map() : array
+    {
+        return [
+            static::HEX_TAG => 'Hex Tag',
+            static::HEX_AMP => 'Hex Amp',
+            static::HEX_APOS => 'Hex Apos',
+            static::HEX_QUOT => 'Hex Quot',
+        ];
+    }
 }
 ```
 

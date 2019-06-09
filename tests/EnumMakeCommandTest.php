@@ -61,6 +61,27 @@ class EnumMakeCommandTest extends TestCase
     /**
      * @test
      */
+    public function validateKeys()
+    {
+        $this->expectExceptionMessage('Invalid type provided for keys. Allowed keys: bitwise, int0, int1, lower');
+
+        $this->artisan('make:enum Test8 TEST --keys=unknown');
+    }
+
+    /**
+     * @test
+     */
+    public function generateEnumKeys()
+    {
+        $this->artisan('make:enum Test3 TEST --keys=int0')->assertExitCode(0);
+
+        $this->assertFileExists($this->appPath('Enums/Test2.php'));
+        $this->assertFileEquals(__DIR__ . '/int0.stub', $this->appPath('Enums/Test2.php'));
+    }
+
+    /**
+     * @test
+     */
     public function generateEnumInCustomDirectory()
     {
         $this->artisan('make:enum Test TEST --path=Other/Directory')->assertExitCode(0);

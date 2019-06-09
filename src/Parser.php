@@ -2,7 +2,7 @@
 
 namespace Cerbero\LaravelEnum;
 
-use Illuminate\Support\Str;
+use Closure;
 
 /**
  * The enums parser.
@@ -17,16 +17,18 @@ class Parser
      * Parse the enums definition
      *
      * @param string $definition
+     * @param \Cerbero\LaravelEnum\Keys|null $keys
      * @return array
      */
-    public function parseDefinition(string $definition) : array
+    public function parseDefinition(string $definition, Keys $keys = null) : array
     {
+        $resolveKeys = optional($keys)->value();
         $enums = explode(static::SEPARATOR_ENUM, $definition);
 
-        return array_map(function (string $enum) {
+        return array_map(function (string $enum) use ($resolveKeys) {
             $parts = explode(static::SEPARATOR_PART, $enum);
 
-            return $this->hydrateEnumDefinition($parts);
+            return $this->hydrateEnumDefinition($parts, $resolveKeys);
         }, $enums);
     }
 
@@ -34,15 +36,23 @@ class Parser
      * Retrieve the hydrated enum definition
      *
      * @param array $parts
+     * @param \Closure|null $resolveKeys
      * @return EnumDefinition
      */
-    private function hydrateEnumDefinition(array $parts) : EnumDefinition
+    private function hydrateEnumDefinition(array $parts, Closure $resolveKeys = null) : EnumDefinition
     {
-        return tap(new EnumDefinition, function ($enumDefinition) use ($parts) {
-            $enumDefinition->name = $parts[0];
-            $enumDefinition->key = isset($parts[1]) ? $this->parseValue($parts[1]) : Str::lower($parts[0]);
-            $enumDefinition->value = isset($parts[2]) ? $this->parseValue($parts[2]) : null;
-        });
+        $enum = new EnumDefinition;
+        $enum->name = $parts[0];
+
+        if ($resolveKeys) {
+            $enum->key = $resolveKeys($parts[0]);
+            $enum->value = isset($parts[2]) ? $this->parseValue($parts[2]) : $this->parseValue($parts[1] ?? null);
+        } else {
+            $enum->key = isset($parts[1]) ? $this->parseValue($parts[1]) : Keys::LOWER()->value()($parts[0]);
+            $enum->value = $this->parseValue($parts[2] ?? null);
+        }
+
+        return $enum;
     }
 
     /**
