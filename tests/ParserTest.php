@@ -152,13 +152,87 @@ class ParserTest extends TestCase
     /**
      * @test
      */
-    public function parseNumericDefinition()
+    public function parseDefinitionWithOneNamePassingKeys()
     {
-        $definition = 'ONE|TWO|THREE';
-        $expectedNames = ['ONE', 'TWO', 'THREE'];
-        $expectedKeys = [1, 2, 3];
+        $definition = 'ENUM_NAME';
+        $keys = $this->getFreshKeys(Keys::INT0);
 
-        $enums = $this->parser->parseDefinition($definition, true);
+        $enums = $this->parser->parseDefinition($definition, $keys);
+
+        $this->assertIsArray($enums);
+        $this->assertCount(1, $enums);
+        $this->assertInstanceOf(EnumDefinition::class, $enums[0]);
+        $this->assertSame('ENUM_NAME', $enums[0]->name);
+        $this->assertSame(0, $enums[0]->key);
+        $this->assertNull($enums[0]->value);
+    }
+
+    /**
+     * Retrieve a fresh instance of the given key
+     *
+     * @param string $key
+     * @return \Cerbero\LaravelEnum\Keys
+     */
+    private function getFreshKeys(string $key) : Keys
+    {
+        $name = Keys::nameForKey($key);
+        $map = (new Keys('', null, null))->map();
+        $value = $map[$key];
+
+        return new Keys($name, $key, $value);
+    }
+
+    /**
+     * @test
+     */
+    public function parseDefinitionWithOneNameAndValuePassingKeys()
+    {
+        $definition = 'OTHER_NAME=foo';
+        $keys = $this->getFreshKeys(Keys::LOWER);
+
+        $enums = $this->parser->parseDefinition($definition, $keys);
+
+        $this->assertIsArray($enums);
+        $this->assertCount(1, $enums);
+        $this->assertInstanceOf(EnumDefinition::class, $enums[0]);
+        $this->assertSame('OTHER_NAME', $enums[0]->name);
+        $this->assertSame('other_name', $enums[0]->key);
+        $this->assertSame('foo', $enums[0]->value);
+    }
+
+    /**
+     * @test
+     */
+    public function parseDefinitionWithOneEnumPassingKeys()
+    {
+        $definition = 'NAME=2=[{"foo":"bar"},{"baz":1.2}]';
+        $keys = $this->getFreshKeys(Keys::INT1);
+        $expectedValue = [
+            ['foo' => 'bar'],
+            ['baz' => 1.2],
+        ];
+
+        $enums = $this->parser->parseDefinition($definition, $keys);
+
+        $this->assertIsArray($enums);
+        $this->assertCount(1, $enums);
+        $this->assertInstanceOf(EnumDefinition::class, $enums[0]);
+        $this->assertSame('NAME', $enums[0]->name);
+        $this->assertSame(1, $enums[0]->key);
+        $this->assertSame($expectedValue, $enums[0]->value);
+    }
+
+    /**
+     * @test
+     */
+    public function parseDefinitionWithOnlyNamesPassingKeys()
+    {
+        $definition = 'FIRST_NAME|SECOND_NAME|THIRD_NAME';
+        $keys = $this->getFreshKeys(Keys::BITWISE);
+        $expectedNames = ['FIRST_NAME', 'SECOND_NAME', 'THIRD_NAME'];
+        $expectedKeys = [1, 2, 4];
+
+        $enums = $this->parser->parseDefinition($definition, $keys);
 
         $this->assertIsArray($enums);
         $this->assertCount(3, $enums);
@@ -167,23 +241,25 @@ class ParserTest extends TestCase
             $this->assertInstanceOf(EnumDefinition::class, $enums[$i]);
             $this->assertSame($expectedNames[$i], $enums[$i]->name);
             $this->assertSame($expectedKeys[$i], $enums[$i]->key);
+            $this->assertNull($enums[$i]->value);
         }
     }
 
     /**
      * @test
      */
-    public function parseNumericDefinitionWithValues()
+    public function parseDefinitionWithOnlyNamesAndValuesPassingKeys()
     {
-        $definition = 'ONE=Number One|TWO=Number Two|THREE=Number Three';
-        $expectedNames = ['ONE', 'TWO', 'THREE'];
-        $expectedKeys = [1, 2, 3];
-        $expectedValues = ['Number One', 'Number Two', 'Number Three'];
+        $definition = 'ONE=1|TWO=false|THREE=["foo"]|FOUR=4.4';
+        $keys = $this->getFreshKeys(Keys::BITWISE);
+        $expectedNames = ['ONE', 'TWO', 'THREE', 'FOUR'];
+        $expectedKeys = [1, 2, 4, 8];
+        $expectedValues = [1, false, ['foo'], 4.4];
 
-        $enums = $this->parser->parseDefinition($definition, true);
+        $enums = $this->parser->parseDefinition($definition, $keys);
 
         $this->assertIsArray($enums);
-        $this->assertCount(3, $enums);
+        $this->assertCount(4, $enums);
 
         for ($i = 0; $i < count($enums); $i++) {
             $this->assertInstanceOf(EnumDefinition::class, $enums[$i]);
@@ -196,35 +272,15 @@ class ParserTest extends TestCase
     /**
      * @test
      */
-    public function parseBitwiseDefinition()
+    public function parseDefinitionWithManyEnumsPassingKeys()
     {
-        $definition = 'ONE|TWO|FOUR|EIGHT';
-        $expectedNames = ['ONE', 'TWO', 'FOUR', 'EIGHT'];
-        $expectedKeys = [1, 2, 4, 8];
+        $definition = 'THE_ONE=11=1.3|THE_TWO=false=true|THE_THREE=["baz"]=22|THE_FOUR=40.4={"foo":"bar"}';
+        $keys = $this->getFreshKeys(Keys::INT0);
+        $expectedNames = ['THE_ONE', 'THE_TWO', 'THE_THREE', 'THE_FOUR'];
+        $expectedKeys = [0, 1, 2, 3];
+        $expectedValues = [1.3, true, 22, ['foo' => 'bar']];
 
-        $enums = $this->parser->parseDefinition($definition, false, true);
-
-        $this->assertIsArray($enums);
-        $this->assertCount(4, $enums);
-
-        for ($i = 0; $i < count($enums); $i++) {
-            $this->assertInstanceOf(EnumDefinition::class, $enums[$i]);
-            $this->assertSame($expectedNames[$i], $enums[$i]->name);
-            $this->assertSame($expectedKeys[$i], $enums[$i]->key);
-        }
-    }
-
-    /**
-     * @test
-     */
-    public function parseBitwiseDefinitionWithValues()
-    {
-        $definition = 'ONE=0b0001|TWO=0b0010|FOUR=0b0100|EIGHT=0b1000';
-        $expectedNames = ['ONE', 'TWO', 'FOUR', 'EIGHT'];
-        $expectedKeys = [1, 2, 4, 8];
-        $expectedValues = ['0b0001', '0b0010', '0b0100', '0b1000'];
-
-        $enums = $this->parser->parseDefinition($definition, false, true);
+        $enums = $this->parser->parseDefinition($definition, $keys);
 
         $this->assertIsArray($enums);
         $this->assertCount(4, $enums);
