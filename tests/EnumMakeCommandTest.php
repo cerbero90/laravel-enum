@@ -73,7 +73,7 @@ class EnumMakeCommandTest extends TestCase
      */
     public function generateEnumKeys()
     {
-        $this->artisan('make:enum Test3 TEST --keys=int0')->assertExitCode(0);
+        $this->artisan('make:enum Test2 TEST --keys=int0')->assertExitCode(0);
 
         $this->assertFileExists($this->appPath('Enums/Test2.php'));
         $this->assertFileEquals(__DIR__ . '/int0.stub', $this->appPath('Enums/Test2.php'));
