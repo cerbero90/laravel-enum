@@ -7,6 +7,8 @@ use Illuminate\Support\Str;
 use Cerbero\LaravelEnum\StubAssembler;
 use Cerbero\LaravelEnum\Parser;
 use Cerbero\LaravelEnum\Keys;
+use Rexlabs\Enum\Exceptions\InvalidKeyException;
+use Symfony\Component\Console\Exception\InvalidArgumentException;
 
 /**
  * The Artisan command to generate Enum classes.
@@ -113,10 +115,15 @@ class EnumMakeCommand extends GeneratorCommand
      */
     private function getKeys() : ?Keys
     {
-        if ($key = $this->option('keys')) {
-            return Keys::instanceFromKey($key);
+        if (null === $key = $this->option('keys')) {
+            return null;
         }
 
-        return null;
+        try {
+            return Keys::instanceFromKey($key);
+        } catch (InvalidKeyException $e) {
+            $keys = implode(', ', Keys::keys());
+            throw new InvalidArgumentException("Invalid type provided for keys. Allowed keys: {$keys}");
+        }
     }
 }
