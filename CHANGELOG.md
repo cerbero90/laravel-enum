@@ -4,6 +4,14 @@ All notable changes to `laravel-enum` will be documented in this file.
 
 Updates should follow the [Keep a CHANGELOG](http://keepachangelog.com/) principles.
 
+
+
+## v1.3.0 - 2020-09-19
+
+### Added
+- Support for Laravel 8.
+
+
 ## v1.2.1 - 2020-03-04
 
 ### Added
