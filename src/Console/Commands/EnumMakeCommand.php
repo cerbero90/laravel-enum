@@ -22,11 +22,13 @@ class EnumMakeCommand extends GeneratorCommand
      * @var string
      */
     protected $signature = 'make:enum
-                            {name : The name of the class}
-                            {enum : The definition of the enum}
-                            {--k|keys= : The type of keys to generate if not defined}
-                            {--p|path= : The path to generate enums in}
-                            {--f|force : Create the class even if the enum already exists}';
+                            {name : The name of the class or the relative path}
+                            {cases : Either the enum names or values}
+                            {--n|named= : The names to associate the enum values with}
+                            {--b|backed= : The values to back the enum names}
+                            {--k|keys= : The enum keys (color=red,blue,green isOdd=true,false,true)}
+                            {--l|lang=en : The language to add translations to}
+                            {--f|force : Create the enum even if it already exists}';
 
     /**
      * The console command description.
@@ -98,7 +100,7 @@ class EnumMakeCommand extends GeneratorCommand
      *
      * @return array
      */
-    private function parseEnums() : array
+    private function parseEnums(): array
     {
         // Normalise definition as argument() may return an array
         $enum = (array) $this->argument('enum');
@@ -113,17 +115,17 @@ class EnumMakeCommand extends GeneratorCommand
      *
      * @return \Cerbero\LaravelEnum\Keys|null
      */
-    private function getKeys() : ?Keys
+    private function getKeys(): ?Keys
     {
         if (null === $key = $this->option('keys')) {
             return null;
         }
 
-        try {
-            return Keys::instanceFromKey($key);
-        } catch (InvalidKeyException $e) {
-            $keys = implode(', ', Keys::keys());
-            throw new InvalidArgumentException("Invalid type provided for keys. Allowed keys: {$keys}");
-        }
+        // try {
+        //     return Keys::instanceFromKey($key);
+        // } catch (InvalidKeyException $e) {
+        //     $keys = implode(', ', Keys::keys());
+        //     throw new InvalidArgumentException("Invalid type provided for keys. Allowed keys: {$keys}");
+        // }
     }
 }

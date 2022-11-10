@@ -1,11 +1,11 @@
 {
     "name": "cerbero/laravel-enum",
     "type": "library",
-    "description": "Enum generator for Laravel.",
+    "description": "Supercharge enum functionalities in Laravel.",
     "keywords": [
-        "cerbero",
-        "laravel-enum",
-        "enum"
+        "enum",
+        "enumeration",
+        "laravel"
     ],
     "homepage": "https://github.com/cerbero90/laravel-enum",
     "license": "MIT",
@@ -16,14 +16,15 @@
         "role": "Developer"
     }],
     "require": {
-        "php": "^7.1",
-        "illuminate/console": "^5.6|^6.0|^7.0|^8.0",
-        "illuminate/support": "^5.6|^6.0|^7.0|^8.0",
-        "rexlabs/enum": "^2.0"
+        "php": "^8.1",
+        "illuminate/console": ">=6.0",
+        "illuminate/support": ">=6.0",
+        "cerbero/enum": "^1.0"
     },
     "require-dev": {
-        "orchestra/testbench": "^3.6|^4.0|^5.0|^6.0",
-        "phpunit/phpunit": ">=7.0",
+        "orchestra/testbench": ">=4.0",
+        "pestphp/pest": "^1.21",
+        "scrutinizer/ocular": "^1.9",
         "squizlabs/php_codesniffer": "^3.0"
     },
     "autoload": {
@@ -37,9 +38,9 @@
         }
     },
     "scripts": {
-        "test": "phpunit",
-        "check-style": "phpcs src tests",
-        "fix-style": "phpcbf src tests"
+        "test": "pest",
+        "check-style": "phpcs --standard=PSR12 src",
+        "fix-style": "phpcbf --standard=PSR12 src"
     },
     "extra": {
         "branch-alias": {
@@ -52,6 +53,9 @@
         }
     },
     "config": {
-        "sort-packages": true
+        "sort-packages": true,
+        "allow-plugins": {
+            "pestphp/pest-plugin": true
+        }
     }
 }

@@ -19,9 +19,7 @@ class LaravelEnumServiceProvider extends ServiceProvider
     public function boot()
     {
         if ($this->app->runningInConsole()) {
-            $this->commands([
-                EnumMakeCommand::class,
-            ]);
+            $this->commands(EnumMakeCommand::class);
         }
     }
 }
