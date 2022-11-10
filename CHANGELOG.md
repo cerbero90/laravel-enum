@@ -6,6 +6,12 @@ Updates should follow the [Keep a CHANGELOG](http://keepachangelog.com/) princip
 
 
 
+## v1.3.1 - 2022-11-10
+
+### Added
+- Support for PHP 8 and the latest Laravel releases.
+
+
 ## v1.3.0 - 2020-09-19
 
 ### Added
