@@ -1,27 +1,29 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Cerbero\LaravelEnum\Providers;
 
 use Illuminate\Support\ServiceProvider;
-use Cerbero\LaravelEnum\Console\Commands\EnumMakeCommand;
 
 /**
- * The Laravel Enum service provider.
- *
+ * The package service provider.
  */
-class LaravelEnumServiceProvider extends ServiceProvider
+final class LaravelEnumServiceProvider extends ServiceProvider
 {
     /**
-     * Bootstrap the application services.
-     *
-     * @return void
+     * Bootstrap the package services.
      */
-    public function boot()
+    public function boot(): void
     {
-        if ($this->app->runningInConsole()) {
-            $this->commands([
-                EnumMakeCommand::class,
-            ]);
-        }
+        //
+    }
+
+    /**
+     * Register the package services.
+     */
+    public function register(): void
+    {
+        //
     }
 }
