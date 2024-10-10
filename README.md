@@ -3,7 +3,6 @@
 [![Author][ico-author]][link-author]
 [![PHP Version][ico-php]][link-php]
 [![Laravel Version][ico-laravel]][link-laravel]
-[![Octane Compatibility][ico-octane]][link-octane]
 [![Build Status][ico-actions]][link-actions]
 [![Coverage Status][ico-scrutinizer]][link-scrutinizer]
 [![Quality Score][ico-code-quality]][link-code-quality]
@@ -25,6 +24,70 @@ composer require cerbero/laravel-enum
 ```
 
 ## 🔮 Usage
+
+* [🔣 Translation](#-translation)
+
+This package provides all the functionalities of [🎲 Enum](https://github.com/cerbero90/enum) plus Laravel specific features.
+
+To supercharge our enums, we just need to let them use the `Enumerates` trait:
+
+```php
+use Cerbero\LaravelEnum\Concerns\Enumerates;
+
+enum OurEnum: int
+{
+    use Enumerates;
+
+    case One = 1;
+    case Two = 2;
+    case Three = 3;
+}
+```
+
+
+### 🔣 Translation
+
+When a case calls an inaccessible method, and it has no matching [meta](https://github.com/cerbero90/enum?tab=readme-ov-file#%EF%B8%8F-meta), Laravel Enum presumes that we want to access a translation:
+
+```php
+OurEnum::One->description();
+
+// lang/en/enums.php
+return [
+    OurEnum::class => [
+        'One' => [
+            'description' => 'Our description for case One',
+        ],
+    ],
+];
+```
+
+By default the translation key is resolved with `enums.{enum namespace}.{case name}.{inaccessible method}`. If needed, we can customize the translation key:
+
+```php
+use Cerbero\LaravelEnum\Enums;
+
+Enums::translateFrom(function(UnitEnum $case) {
+    return sprintf('custom.%s.%s', $case::class, $case->name);
+});
+```
+
+The above logic will resolve the translation key with `custom.{enum namespace}.{case name}.{inaccessible method}`.
+
+Also, we can pass values to fill the placeholders in our translations:
+
+```php
+return [
+    OurEnum::class => [
+        'One' => [
+            'description' => 'Description with value :value',
+        ],
+    ],
+];
+
+// this will output: Description with value 123
+OurEnum::One->description(['value' => 123]);
+```
 
 > [!NOTE]
 > Work in progress... 🚧
@@ -59,7 +122,6 @@ The MIT License (MIT). Please see [License File](LICENSE.md) for more informatio
 [ico-author]: https://img.shields.io/static/v1?label=author&message=cerbero90&color=50ABF1&logo=twitter&style=flat-square
 [ico-php]: https://img.shields.io/packagist/php-v/cerbero/laravel-enum?color=%234F5B93&logo=php&style=flat-square
 [ico-laravel]: https://img.shields.io/static/v1?label=laravel&message=%E2%89%A59.0&color=ff2d20&logo=laravel&style=flat-square
-[ico-octane]: https://img.shields.io/static/v1?label=octane&message=compatible&color=ff2d20&logo=laravel&style=flat-square
 [ico-version]: https://img.shields.io/packagist/v/cerbero/laravel-enum.svg?label=version&style=flat-square
 [ico-actions]: https://img.shields.io/github/actions/workflow/status/cerbero90/laravel-enum/build.yml?branch=master&style=flat-square&logo=github
 [ico-license]: https://img.shields.io/badge/license-MIT-brightgreen.svg?style=flat-square
@@ -72,7 +134,6 @@ The MIT License (MIT). Please see [License File](LICENSE.md) for more informatio
 [link-author]: https://twitter.com/cerbero90
 [link-php]: https://www.php.net
 [link-laravel]: https://laravel.com
-[link-octane]: https://github.com/laravel/octane
 [link-packagist]: https://packagist.org/packages/cerbero/laravel-enum
 [link-actions]: https://github.com/cerbero90/laravel-enum/actions?query=workflow%3Abuild
 [link-per]: https://www.php-fig.org/per/coding-style/
