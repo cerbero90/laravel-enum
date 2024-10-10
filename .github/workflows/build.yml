@@ -13,6 +13,7 @@ jobs:
             matrix:
                 php: [8.1, 8.2, 8.3]
                 laravel: [9.*, 10.*, 11.*]
+                testbench: [7.*, 8.*, 9.*]
                 dependency-version: [prefer-lowest, prefer-stable]
                 os: [ubuntu-latest]
                 exclude:
@@ -35,7 +36,7 @@ jobs:
 
             - name: Install dependencies
               run: |
-                  composer require "illuminate/support=${{ matrix.laravel }}" --no-interaction --no-update
+                  composer require "illuminate/support=${{ matrix.laravel }}" "orchestra/testbench:${{ matrix.testbench }}" --no-interaction --no-update
                   composer update --${{ matrix.dependency-version }} --prefer-dist --no-interaction
 
             - name: Execute tests
