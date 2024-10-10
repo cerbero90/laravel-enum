@@ -57,8 +57,10 @@ class Enums extends BaseEnums
             /** @phpstan-ignore method.notFound */
             return $case->resolveMetaAttribute($name);
         } catch (Throwable $e) {
+            /** @var UnitEnum $case */
             $key = static::resolveTranslationKey($case) . ".{$name}";
 
+            /** @var array{array<string, mixed>, ?string, bool} $arguments */
             return ($key === $translation = Lang::get($key, ...$arguments)) ? throw $e : $translation;
         }
     }
