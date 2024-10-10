@@ -14,6 +14,9 @@
 
 Laravel package to supercharge enum functionalities.
 
+> [!TIP]
+> Need a framework-agnostic solution? Consider using [🎲 Enum](https://github.com/cerbero90/enum) instead.
+
 
 ## 📦 Install
 
@@ -88,9 +91,6 @@ return [
 // this will output: Description with value 123
 OurEnum::One->description(['value' => 123]);
 ```
-
-> [!NOTE]
-> Work in progress... 🚧
 
 ## 📆 Change log
 
