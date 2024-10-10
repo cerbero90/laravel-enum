@@ -15,6 +15,9 @@ jobs:
                 laravel: [9.*, 10.*, 11.*]
                 dependency-version: [prefer-lowest, prefer-stable]
                 os: [ubuntu-latest]
+                exclude:
+                    - php: 8.1
+                      laravel: 11.*
 
         name: PHP ${{ matrix.php }} - Laravel ${{ matrix.laravel }} - ${{ matrix.dependency-version }} - ${{ matrix.os }}
 
