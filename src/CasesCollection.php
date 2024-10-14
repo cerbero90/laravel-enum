@@ -20,6 +20,7 @@ use Stringable;
  * @template TValue
  *
  * @extends BaseCasesCollection<TKey, TValue>
+ * @implements Arrayable<TKey, TValue>
  */
 class CasesCollection extends BaseCasesCollection implements Arrayable, Jsonable, JsonSerializable, Stringable
 {
@@ -32,7 +33,7 @@ class CasesCollection extends BaseCasesCollection implements Arrayable, Jsonable
      */
     public function __toString(): string
     {
-        return $this->toJson();
+        return (string) $this->toJson();
     }
 
     /**
