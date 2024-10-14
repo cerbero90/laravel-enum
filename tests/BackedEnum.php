@@ -14,7 +14,7 @@ use Cerbero\LaravelEnum\Concerns\Enumerates;
  * @method string color()
  * @method string shape()
  * @method string description()
- * @method string dynamic(array $replace = [])
+ * @method string dynamic(array<string, mixed> $replace = [])
  */
 #[Meta(color: 'green', shape: 'square')]
 enum BackedEnum: int
@@ -31,8 +31,6 @@ enum BackedEnum: int
 
     /**
      * Determine whether the case is odd.
-     *
-     * @return bool
      */
     public function isOdd(): bool
     {

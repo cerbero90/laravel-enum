@@ -21,3 +21,25 @@ it('translates from custom keys', function() {
 
 it('fails if a translation cannot be found', fn() => BackedEnum::One->unknownTranslation())
     ->throws(ValueError::class, '"unknownTranslation" is not a valid meta for enum "Cerbero\LaravelEnum\BackedEnum"');
+
+it('handles the call to an inaccessible enum method', function() {
+    expect(BackedEnum::One())->toBe(1);
+});
+
+it('runs custom logic when calling an inaccessible case method', function() {
+    Enums::onCall(function(object $case, string $name, array $arguments) {
+        expect($case)->toBeInstanceOf(BackedEnum::class)
+            ->and($name)->toBe('unknownMethod')
+            ->and($arguments)->toBe([1, 2, 3]);
+
+        return 'ciao';
+    });
+
+    expect(BackedEnum::One->unknownMethod(1, 2, 3))->toBe('ciao');
+
+    (fn() => self::$onCall = null)->bindTo(null, Enums::class)();
+});
+
+it('handles the invocation of a case.', function() {
+    expect((BackedEnum::One)())->toBe(1);
+});

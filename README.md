@@ -28,7 +28,8 @@ composer require cerbero/laravel-enum
 
 ## 🔮 Usage
 
-* [🔣 Translation](#-translation)
+* [🧺 Cases collection](#-cases-collection)
+* [🪄 Magic translation](#-magic-translation)
 
 This package provides all the functionalities of [🎲 Enum](https://github.com/cerbero90/enum) plus Laravel specific features.
 
@@ -48,9 +49,29 @@ enum OurEnum: int
 ```
 
 
-### 🔣 Translation
+### 🧺 Cases collection
 
-When a case calls an inaccessible method, and it has no matching [meta](https://github.com/cerbero90/enum?tab=readme-ov-file#%EF%B8%8F-meta), Laravel Enum presumes that we want to access a translation:
+The [original cases collection](https://github.com/cerbero90/enum?tab=readme-ov-file#-cases-collection) has been extended to play better with the Laravel framework.
+
+The new cases collection implements the `Illuminate\Contracts\Support\Arrayable` and `Illuminate\Contracts\Support\Jsonable` contracts and it can be serialized into a JSON.
+
+It also leverages the following Laravel traits:
+- `Illuminate\Support\Traits\Conditionable` to run conditions while keeping the methods chain
+- `Illuminate\Support\Traits\Macroable` to add methods to the collection at runtime
+- `Illuminate\Support\Traits\Tappable` to run custom logic while keeping the methods chain
+
+Furthermore the new collection allows us to `dump()` and `dd()` its cases:
+
+```php
+OurEnum::collect()->dump();
+
+OurEnum::collect()->dd();
+```
+
+
+### 🪄 Magic translation
+
+When a case calls an inaccessible method and the case has no matching [meta](https://github.com/cerbero90/enum?tab=readme-ov-file#%EF%B8%8F-meta), Laravel Enum presumes that we want to access a translation:
 
 ```php
 OurEnum::One->description();

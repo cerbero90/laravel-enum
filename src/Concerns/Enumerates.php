@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace Cerbero\LaravelEnum\Concerns;
 
-use Cerbero\Enum\Concerns\CollectsCases;
 use Cerbero\Enum\Concerns\Compares;
 use Cerbero\Enum\Concerns\Hydrates;
 use Cerbero\Enum\Concerns\SelfAware;
