@@ -237,7 +237,8 @@ it('casts an invalid value', function() {
 });
 
 it('fails to cast invalid cases', fn() => (new User())->forceFill(['numbers' => [123]])->numbers)
-    ->throws(ValueError::class, '123 is not a valid backing value for enum "Cerbero\LaravelEnum\BackedEnum"');
+    ->throwsIf(version_compare(PHP_VERSION, '8.2') == -1, ValueError::class, '123 is not a valid backing value for enum "Cerbero\LaravelEnum\BackedEnum"')
+    ->throwsIf(version_compare(PHP_VERSION, '8.2') >= 0, ValueError::class, '123 is not a valid backing value for enum Cerbero\LaravelEnum\BackedEnum');
 
 it('fails to cast an invalid enum', fn() => (new User())->forceFill(['invalid' => [1]])->numbers)
     ->throws(InvalidArgumentException::class, 'The cast argument must be a valid enum');
