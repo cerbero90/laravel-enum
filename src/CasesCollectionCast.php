@@ -48,6 +48,7 @@ class CasesCollectionCast implements CastsAttributes
     {
         return match (true) {
             is_string($value) => $this->getByJson($value),
+            /** @phpstan-ignore-next-line binaryOp.invalid */
             is_int($value) => $this->enum::filter(fn(BackedEnum $case) => ($value & $case->value) == $case->value),
             default => null,
         };
@@ -79,7 +80,7 @@ class CasesCollectionCast implements CastsAttributes
         $this->withoutObjectCaching = ! $value instanceof CasesCollection;
 
         return match (true) {
-            $value instanceof CasesCollection => $value->toJson(),
+            $value instanceof CasesCollection => $value->toJson() ?: null,
             is_array($value) => $this->setByArray($value),
             is_int($value) => $value,
             default => null,
@@ -94,7 +95,7 @@ class CasesCollectionCast implements CastsAttributes
     protected function setByArray(array $array): string|int|null
     {
         if (is_subclass_of($this->enum, Bitwise::class)) {
-            return array_reduce($array, function(?int $carry, BackedEnum|int $item) {
+            return array_reduce($array, function (?int $carry, mixed $item): int {
                 return $carry |= $item instanceof BackedEnum ? $item->value : $item;
             });
         }
