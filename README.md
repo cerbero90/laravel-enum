@@ -29,7 +29,7 @@ composer require cerbero/laravel-enum
 ## 🔮 Usage
 
 * [🧺 Cases collection](#-cases-collection)
-* [🪄 Magic translation](#-magic-translation)
+* [🪄 Magic](#-magic)
 
 This package provides all the functionalities of [🎲 Enum](https://github.com/cerbero90/enum) plus Laravel specific features.
 
@@ -38,7 +38,7 @@ To supercharge our enums, we just need to let them use the `Enumerates` trait:
 ```php
 use Cerbero\LaravelEnum\Concerns\Enumerates;
 
-enum OurEnum: int
+enum Numbers: int
 {
     use Enumerates;
 
@@ -51,7 +51,7 @@ enum OurEnum: int
 
 ### 🧺 Cases collection
 
-The [original cases collection](https://github.com/cerbero90/enum?tab=readme-ov-file#-cases-collection) has been extended to play better with the Laravel framework.
+The [original cases collection](https://github.com/cerbero90/enum?tab=readme-ov-file#-cases-collection) has been extended to integrate better with the Laravel framework.
 
 The new cases collection implements the `Illuminate\Contracts\Support\Arrayable` and `Illuminate\Contracts\Support\Jsonable` contracts and it can be serialized into a JSON.
 
@@ -63,24 +63,112 @@ It also leverages the following Laravel traits:
 Furthermore the new collection allows us to `dump()` and `dd()` its cases:
 
 ```php
-OurEnum::collect()->dump();
+Numbers::collect()->dump();
 
-OurEnum::collect()->dd();
+Numbers::collect()->dd();
 ```
 
-
-### 🪄 Magic translation
-
-When a case calls an inaccessible method and the case has no matching [meta](https://github.com/cerbero90/enum?tab=readme-ov-file#%EF%B8%8F-meta), Laravel Enum presumes that we want to access a translation:
+Cases collection can be cast in an Eloquent model to store multiple cases in one database column and to re-hydrate such cases back to a collection:
 
 ```php
-OurEnum::One->description();
+use Cerbero\LaravelEnum\CasesCollection;
+
+class User extends Model
+{
+    // before Laravel 11
+    protected $casts = [
+        'numbers' => CasesCollection::class . ':' . Numbers::class,
+    ];
+
+    // after Laravel 11
+    protected function casts(): array
+    {
+        return [
+            'numbers' => CasesCollection::of(Numbers::class),
+        ];
+    }
+}
+```
+
+Now we can assign an array of names, values or cases to the `numbers` property and receive back a cases collection when we access such property:
+
+```php
+$user->numbers = ['One', 'Two'];
+
+$user->numbers = [1, 2];
+
+$user->numbers = [Numbers::One, Numbers::Two];
+
+$user->numbers; // CasesCollection[Numbers::One, Numbers::Two]
+```
+
+The cases collection above is stored in the database as `["One","Two"]` if the enum is pure, or as `[1,2]` if the enum is backed.
+
+The cast also supports bitwise backed enums, so for example if we have an enum of permissions implementing the `Bitwise` contract:
+
+```php
+use Cerbero\LaravelEnum\Contracts\Bitwise;
+
+enum Permissions: int implements Bitwise
+{
+    case CreatePost = 1;
+    case UpdatePost = 2;
+    case DeletePost = 4;
+}
+```
+
+And we set the permissions cast on our Eloquent model:
+
+```php
+use Cerbero\LaravelEnum\CasesCollection;
+
+class User extends Model
+{
+    // before Laravel 11
+    protected $casts = [
+        'permissions' => CasesCollection::class . ':' . Permissions::class,
+    ];
+
+    // after Laravel 11
+    protected function casts(): array
+    {
+        return [
+            'permissions' => CasesCollection::of(Permissions::class),
+        ];
+    }
+}
+```
+
+We can assign a bitwise value or an array of values/bitwise backed cases to the `permissions` property and receive back a cases collection when we access such property:
+
+```php
+$user->permissions = 3;
+
+$user->permissions = 1 | 2;
+
+$user->permissions = Permissions::CreatePost->value | Permissions::UpdatePost->value;
+
+$user->permissions = [1, 2];
+
+$user->permissions = [Permissions::CreatePost, Permissions::UpdatePost];
+
+$user->permissions; // CasesCollection[Permissions::CreatePost, Permissions::UpdatePost]
+```
+
+The cases collection above is stored in the database as `3`, the result of the bitwise operator `OR`.
+
+### 🪄 Magic
+
+On top of [Enum's magic](https://github.com/cerbero90/enum?tab=readme-ov-file#-magic), when a case calls an inaccessible method, and such case has no matching [meta](https://github.com/cerbero90/enum?tab=readme-ov-file#%EF%B8%8F-meta), Laravel Enum assumes that we want to access a translation:
+
+```php
+Numbers::One->description();
 
 // lang/en/enums.php
 return [
-    OurEnum::class => [
+    Numbers::class => [
         'One' => [
-            'description' => 'Our description for case One',
+            'description' => 'This is the case One.',
         ],
     ],
 ];
@@ -102,15 +190,15 @@ Also, we can pass values to fill the placeholders in our translations:
 
 ```php
 return [
-    OurEnum::class => [
+    Numbers::class => [
         'One' => [
-            'description' => 'Description with value :value',
+            'description' => 'This is the case :value.',
         ],
     ],
 ];
 
-// this will output: Description with value 123
-OurEnum::One->description(['value' => 123]);
+// This is the case 1.
+Numbers::One->description(['value' => 1]);
 ```
 
 ## 📆 Change log
