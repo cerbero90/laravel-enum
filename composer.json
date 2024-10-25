@@ -18,6 +18,7 @@
     "require": {
         "php": "^8.1",
         "cerbero/enum": "^2.0",
+        "illuminate/contracts": ">=9.0",
         "illuminate/support": ">=9.0"
     },
     "require-dev": {
