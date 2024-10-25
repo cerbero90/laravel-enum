@@ -9,8 +9,6 @@ use Illuminate\Foundation\Testing\LazilyRefreshDatabase;
 use Illuminate\Translation\FileLoader;
 use Orchestra\Testbench\TestCase as OrchestraTestCase;
 
-use function Orchestra\Testbench\package_path;
-
 /**
  * The package test suite.
  */
@@ -50,7 +48,7 @@ class TestCase extends OrchestraTestCase
      */
     protected function defineDatabaseMigrations(): void
     {
-        $this->loadMigrationsFrom(package_path('tests/database/migrations'));
+        $this->loadMigrationsFrom(__DIR__ . '/database/migrations');
     }
 
     /**
