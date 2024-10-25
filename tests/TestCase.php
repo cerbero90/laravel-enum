@@ -5,15 +5,19 @@ declare(strict_types=1);
 namespace Cerbero\LaravelEnum;
 
 use Cerbero\LaravelEnum\Providers\LaravelEnumServiceProvider;
-use Illuminate\Support\Facades\Lang;
+use Illuminate\Foundation\Testing\LazilyRefreshDatabase;
 use Illuminate\Translation\FileLoader;
 use Orchestra\Testbench\TestCase as OrchestraTestCase;
+
+use function Orchestra\Testbench\package_path;
 
 /**
  * The package test suite.
  */
 class TestCase extends OrchestraTestCase
 {
+    use LazilyRefreshDatabase;
+
     /**
      * Retrieve the package providers.
      *
@@ -39,5 +43,24 @@ class TestCase extends OrchestraTestCase
         });
 
         parent::setUp();
+    }
+
+    /**
+     * Define the database migrations.
+     */
+    protected function defineDatabaseMigrations(): void
+    {
+        $this->loadMigrationsFrom(package_path('tests/database/migrations'));
+    }
+
+    /**
+     * Define the environment.
+     */
+    protected function defineEnvironment($app)
+    {
+        $app['config']->set([
+            'database.default' => 'sqlite',
+            'database.connections.sqlite.database' => ':memory:',
+        ]);
     }
 }

@@ -5,6 +5,8 @@ declare(strict_types=1);
 namespace Cerbero\LaravelEnum;
 
 use Cerbero\Enum\CasesCollection as BaseCasesCollection;
+use Illuminate\Contracts\Database\Eloquent\Castable;
+use Illuminate\Contracts\Database\Eloquent\CastsAttributes;
 use Illuminate\Contracts\Support\Arrayable;
 use Illuminate\Contracts\Support\Jsonable;
 use Illuminate\Support\Traits\Conditionable;
@@ -22,11 +24,32 @@ use Stringable;
  * @extends BaseCasesCollection<TKey, TValue>
  * @implements Arrayable<TKey, TValue>
  */
-class CasesCollection extends BaseCasesCollection implements Arrayable, Jsonable, JsonSerializable, Stringable
+class CasesCollection extends BaseCasesCollection implements Arrayable, Castable, Jsonable, JsonSerializable, Stringable
 {
     use Conditionable;
     use Macroable;
     use Tappable;
+
+    /**
+     * Retrieve the caster to cast the collection.
+     *
+     * @param string[] $arguments
+     * @return CasesCollectionCast<TKey, TValue>
+     */
+    public static function castUsing(array $arguments): CastsAttributes
+    {
+        return new CasesCollectionCast($arguments[0] ?? '');
+    }
+
+    /**
+     * Retrieve the cast for the given enum.
+     *
+     * @param class-string<\UnitEnum> $enum
+     */
+    public static function of(string $enum): string
+    {
+        return static::class . ':' . $enum;
+    }
 
     /**
      * Turn the collection into a string.
@@ -43,7 +66,7 @@ class CasesCollection extends BaseCasesCollection implements Arrayable, Jsonable
      */
     public function toJson($options = 0): string|false
     {
-        return json_encode($this->toArray(), $options);
+        return json_encode($this->jsonSerialize(), $options);
     }
 
     /**
@@ -53,7 +76,7 @@ class CasesCollection extends BaseCasesCollection implements Arrayable, Jsonable
      */
     public function jsonSerialize(): array
     {
-        return $this->toArray();
+        return $this->enumIsBacked ? $this->values() : $this->names();
     }
 
     /**

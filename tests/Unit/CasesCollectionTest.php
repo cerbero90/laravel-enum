@@ -14,3 +14,7 @@ it('turns into a JSON', function() {
 it('is JSON serializable', function() {
     expect(json_encode(new CasesCollection(BackedEnum::cases())))->toBe('[1,2,3]');
 });
+
+it('retrieves the cast for the given enum', function() {
+    expect(CasesCollection::of(BackedEnum::class))->toBe(CasesCollection::class . ':' . BackedEnum::class);
+});
