@@ -245,8 +245,8 @@ By default the translation key is resolved with `enums.{enum namespace}.{case na
 ```php
 use Cerbero\LaravelEnum\Enums;
 
-Enums::translateFrom(function(UnitEnum $case) {
-    return sprintf('custom.%s.%s', $case::class, $case->name);
+Enums::translateFrom(function(UnitEnum $case, string $method) {
+    return sprintf('custom.%s.%s.%s', $case::class, $case->name, $method);
 });
 ```
 
