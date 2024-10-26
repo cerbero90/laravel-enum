@@ -12,7 +12,7 @@ it('translates with placeholders', function() {
 });
 
 it('translates from custom keys', function() {
-    Enums::translateFrom(fn(UnitEnum $case) => 'custom.' . $case->name);
+    Enums::translateFrom(fn(UnitEnum $case, string $method) => "custom.{$case->name}.{$method}");
 
     expect(BackedEnum::One->description())->toBe('My custom description');
 
@@ -42,4 +42,15 @@ it('runs custom logic when calling an inaccessible case method', function() {
 
 it('handles the invocation of a case.', function() {
     expect((BackedEnum::One)())->toBe(1);
+});
+
+it('autowires a default meta', function() {
+    expect(BackedEnum::One->handle(1, 2))
+        ->toBe(3)
+        ->and(BackedEnum::Three->handle(1, 2))
+        ->toBe(3);
+});
+
+it('autowires a meta', function() {
+    expect(BackedEnum::Two->handle(1, 2))->toBe(123);
 });

@@ -13,10 +13,11 @@ use Cerbero\LaravelEnum\Concerns\Enumerates;
  * @method static int Three()
  * @method string color()
  * @method string shape()
+ * @method int handle(int $a, int $b)
  * @method string description()
  * @method string dynamic(array<string, mixed> $replace = [])
  */
-#[Meta(color: 'green', shape: 'square')]
+#[Meta(color: 'green', shape: 'square', handle: DefaultHandler::class)]
 enum BackedEnum: int
 {
     use Enumerates;
@@ -24,6 +25,7 @@ enum BackedEnum: int
     #[Meta(color: 'red', shape: 'triangle')]
     case One = 1;
 
+    #[Meta(handle: TwoHandler::class)]
     case Two = 2;
 
     #[Meta(color: 'blue', shape: 'circle')]
