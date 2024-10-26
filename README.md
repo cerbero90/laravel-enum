@@ -221,7 +221,7 @@ $user->permissions = [Permissions::CreatePost, Permissions::UpdatePost];
 $user->permissions; // CasesCollection[Permissions::CreatePost, Permissions::UpdatePost]
 ```
 
-The cases collection above is stored in the database as `3`, the result of the bitwise operator `OR`.
+The cases collection above is stored in the database as `3`, the result of the `OR` bitwise operator.
 
 ### 🪄 Magic
 
