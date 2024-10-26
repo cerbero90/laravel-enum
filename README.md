@@ -72,7 +72,7 @@ enum PayoutStatuses: int
 }
 ```
 
-In the above enum, each case defines a `handle` meta with a callable class. When a case calls its own `handle` meta, the related callable class is resolved by the container and its `__invoke()` method is run with any parameter we pass:
+In the above enum, each case defines a `handle` meta with a callable class. When a case calls its own `handle` meta, the related class is resolved and its `__invoke()` method is run with any parameter we pass:
 
 ```php
 // 🐢 instead of this
