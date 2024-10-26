@@ -5,9 +5,8 @@ declare(strict_types=1);
 namespace Cerbero\LaravelEnum;
 
 use Cerbero\Enum\Enums as BaseEnums;
+use Cerbero\LaravelEnum\Actions\OnCall;
 use Closure;
-use Illuminate\Support\Facades\Lang;
-use Throwable;
 use UnitEnum;
 
 /**
@@ -18,28 +17,28 @@ class Enums extends BaseEnums
     /**
      * The logic to resolve the translation key.
      *
-     * @var ?Closure(UnitEnum $case): string
+     * @var ?Closure(UnitEnum $case, string $method): string
      */
     protected static ?Closure $translateFrom = null;
 
     /**
      * Set the logic to resolve the translation key.
      *
-     * @param Closure(UnitEnum $case): string $callback
+     * @param callable(UnitEnum $case, string $method): string $callback
      */
-    public static function translateFrom(Closure $callback): void
+    public static function translateFrom(callable $callback): void
     {
-        static::$translateFrom = $callback;
+        static::$translateFrom = $callback(...);
     }
 
     /**
      * Retrieve the translation key for the given case.
      */
-    public static function resolveTranslationKey(UnitEnum $case): string
+    public static function resolveTranslationKey(UnitEnum $case, ?string $method = null): string
     {
         return static::$translateFrom
-            ? (static::$translateFrom)($case)
-            : sprintf('enums.%s.%s', $case::class, $case->name);
+            ? (static::$translateFrom)($case, (string) $method)
+            : sprintf('enums.%s.%s%s', $case::class, $case->name, $method ? ".{$method}" : '');
     }
 
     /**
@@ -49,19 +48,6 @@ class Enums extends BaseEnums
      */
     public static function handleCall(object $case, string $name, array $arguments): mixed
     {
-        if (static::$onCall) {
-            return (static::$onCall)($case, $name, $arguments);
-        }
-
-        try {
-            /** @phpstan-ignore method.notFound */
-            return $case->resolveMetaAttribute($name);
-        } catch (Throwable $e) {
-            /** @var UnitEnum $case */
-            $key = static::resolveTranslationKey($case) . ".{$name}";
-
-            /** @var array{array<string, mixed>, ?string, bool} $arguments */
-            return ($key === $translation = Lang::get($key, ...$arguments)) ? throw $e : $translation;
-        }
+        return (static::$onCall ?: new OnCall())($case, $name, $arguments);
     }
 }
