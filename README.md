@@ -28,6 +28,7 @@ composer require cerbero/laravel-enum
 
 ## 🔮 Usage
 
+* [🏷️ Meta](#%EF%B8%8F-meta)
 * [🧺 Cases collection](#-cases-collection)
 * [🪄 Magic](#-magic)
 
@@ -47,6 +48,69 @@ enum Numbers: int
     case Three = 3;
 }
 ```
+
+
+### 🏷️ Meta
+
+Laravel Enum enhances [Enum's meta](https://github.com/cerbero90/enum?tab=readme-ov-file#%EF%B8%8F-meta) by allowing us to attach meta with a class name. If the class is callable (i.e. it implements the `__invoke()` method), such class is resolved by the Laravel container and executed:
+
+```php
+use Cerbero\Enum\Attributes\Meta;
+
+enum PayoutStatuses: int
+{
+    use Enumerates;
+
+    #[Meta(handle: SentPayoutHandler::class)]
+    case Sent;
+
+    #[Meta(handle: OnHoldPayoutHandler::class)]
+    case OnHold;
+
+    #[Meta(handle: DeclinedPayoutHandler::class)]
+    case Declined;
+}
+```
+
+In the above enum, each case defines a `handle` meta with a callable class. When a case calls its own `handle` meta, the related callable class is resolved by the container and its `__invoke()` method is run with any parameter we pass:
+
+```php
+// 🐢 instead of this
+$handler = match ($payout->status) {
+    PayoutStatuses::Sent => SentPayoutHandler::class,
+    PayoutStatuses::OnHold => OnHoldPayoutHandler::class,
+    PayoutStatuses::Declined => DeclinedPayoutHandler::class,
+};
+
+$handlePayout = Container::getInstance()->make($handler);
+
+return $handlePayout($payout);
+
+
+// 🐇 we can do this
+return $payout->status->handle($payout);
+```
+
+If we need to run a default callable class for most cases, we can attach this meta to the enum itself. The cases defining their own meta will override the default callable class:
+
+```php
+use Cerbero\Enum\Attributes\Meta;
+
+#[Meta(handle: DefaultPayoutHandler::class)]
+enum PayoutStatuses: int
+{
+    use Enumerates;
+
+    #[Meta(handle: SentPayoutHandler::class)]
+    case Sent;
+
+    case OnHold;
+
+    case Declined;
+}
+```
+
+In the above example all cases calling the `handle()` method run the `DefaultPayoutHandler`, except the `Sent` case that runs the `SentPayoutHandler`.
 
 
 ### 🧺 Cases collection
@@ -111,6 +175,8 @@ use Cerbero\LaravelEnum\Contracts\Bitwise;
 
 enum Permissions: int implements Bitwise
 {
+    use Enumerates;
+
     case CreatePost = 1;
     case UpdatePost = 2;
     case DeletePost = 4;
