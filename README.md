@@ -57,7 +57,7 @@ Laravel Enum enhances [Enum's meta](https://github.com/cerbero90/enum?tab=readme
 ```php
 use Cerbero\Enum\Attributes\Meta;
 
-enum PayoutStatuses: int
+enum PayoutStatuses
 {
     use Enumerates;
 
@@ -97,7 +97,7 @@ If we need to run a default callable class for most cases, we can attach this me
 use Cerbero\Enum\Attributes\Meta;
 
 #[Meta(handle: DefaultPayoutHandler::class)]
-enum PayoutStatuses: int
+enum PayoutStatuses
 {
     use Enumerates;
 
