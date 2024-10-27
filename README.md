@@ -31,6 +31,7 @@ composer require cerbero/laravel-enum
 * [🏷️ Meta](#%EF%B8%8F-meta)
 * [🧺 Cases collection](#-cases-collection)
 * [🪄 Magic](#-magic)
+* [🪆 Encapsulation](#-encapsulation)
 
 This package provides all the functionalities of [🎲 Enum](https://github.com/cerbero90/enum) plus Laravel specific features.
 
@@ -266,6 +267,55 @@ return [
 // This is the case 1.
 Numbers::One->description(['value' => 1]);
 ```
+
+
+### 🪆 Encapsulation
+
+Laravel Enum offers some extra traits to encapsulate Laravel features that deal with keys. We can hold our keys in an enum (each case is a key) and use Laravel features without ever having to repeat such keys.
+
+The benefits of this approach are many:
+- no flaky strings around our codebase
+- no keys misspelling
+- IDE autocomplete
+- reviewing/managing all our application keys in a central location
+- updating one key in one file instead of all its occurrences
+
+To encapsulate the Laravel session, we can create an enum holding all our session keys and let it use `EnumeratesSessionKeys`. Such enum can be either pure or backed:
+
+```php
+use Cerbero\LaravelEnum\Concerns\EnumeratesSessionKeys;
+
+enum SessionKeys
+{
+    use EnumeratesSessionKeys;
+
+    case CartItems;
+    case OnboardingStep;
+    case PageViews;
+}
+```
+
+The `EnumeratesSessionKeys` trait also uses `Enumerates`, hence all the features of this package. We can now call all the Laravel session methods without having to worry about forgetting/misspelling keys:
+
+```php
+SessionKeys::CartItems->exists();
+SessionKeys::CartItems->missing();
+SessionKeys::CartItems->hasValue();
+SessionKeys::CartItems->get($default);
+SessionKeys::CartItems->pull($default);
+SessionKeys::CartItems->hasOldInput();
+SessionKeys::CartItems->getOldInput($default);
+SessionKeys::CartItems->put($value);
+SessionKeys::CartItems->remember($callback);
+SessionKeys::CartItems->push($value);
+SessionKeys::CartItems->increment($amount);
+SessionKeys::CartItems->decrement($amount);
+SessionKeys::CartItems->flash($value);
+SessionKeys::CartItems->now($value);
+SessionKeys::CartItems->remove();
+SessionKeys::CartItems->forget();
+```
+
 
 ## 📆 Change log
 
