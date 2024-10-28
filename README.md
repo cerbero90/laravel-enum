@@ -295,7 +295,7 @@ enum SessionKeys
 }
 ```
 
-The `EnumeratesSessionKeys` trait also uses `Enumerates`, hence all the features of this package. We can now call all the Laravel session methods without having to worry about forgetting/misspelling keys:
+The `EnumeratesSessionKeys` trait also uses `Enumerates`, hence all the features of this package. We can now call all the Laravel session methods directly from our cases:
 
 ```php
 SessionKeys::CartItems->exists();
@@ -314,6 +314,51 @@ SessionKeys::CartItems->flash($value);
 SessionKeys::CartItems->now($value);
 SessionKeys::CartItems->remove();
 SessionKeys::CartItems->forget();
+```
+
+To encapsulate the Laravel cache, we can create a string backed enum holding all our cache keys and let it use `EnumeratesCacheKeys`:
+
+```php
+use Cerbero\LaravelEnum\Concerns\EnumeratesCacheKeys;
+
+enum CacheKeys: string
+{
+    use EnumeratesCacheKeys;
+
+    case PostComments = 'posts.*.comments';
+    case Tags = 'tags';
+    case TeamMemberPosts = 'teams.*.users.*.posts';
+}
+```
+
+The `EnumeratesCacheKeys` trait also uses `Enumerates`, hence all the features of this package. We can now call all the Laravel cache methods directly from our cases:
+
+```php
+$teamMemberPosts = CacheKeys::TeamMemberPosts($teamId, $userId);
+
+$teamMemberPosts->exists();
+$teamMemberPosts->missing();
+$teamMemberPosts->hasValue();
+$teamMemberPosts->get($default);
+$teamMemberPosts->pull($default);
+$teamMemberPosts->put($value, $ttl);
+$teamMemberPosts->add($value, $ttl);
+$teamMemberPosts->increment($value);
+$teamMemberPosts->decrement($value);
+$teamMemberPosts->forever($value);
+$teamMemberPosts->remember($ttl, $callback);
+$teamMemberPosts->rememberForever($callback);
+$teamMemberPosts->forget();
+```
+
+We can invoke cases and pass parameters to resolve dynamic keys. Such parameters replace the `*` symbols in the cache keys:
+
+```php
+CacheKeys::PostComments($postId)->exists();
+
+CacheKeys::Tags()->exists();
+
+CacheKeys::TeamMemberPosts($teamId, $userId)->exists();
 ```
 
 
