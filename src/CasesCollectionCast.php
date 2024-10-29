@@ -14,10 +14,9 @@ use UnitEnum;
 /**
  * The cases collection cast.
  *
- * @template TKey of array-key
  * @template TValue
  *
- * @implements CastsAttributes<CasesCollection, mixed>
+ * @implements CastsAttributes<?CasesCollection<TValue>, mixed>
  */
 class CasesCollectionCast implements CastsAttributes
 {
@@ -41,7 +40,7 @@ class CasesCollectionCast implements CastsAttributes
      *
      * @param string|int|null $value
      * @param array<string, mixed> $attributes
-     * @return CasesCollection<TKey, TValue>
+     * @return ?CasesCollection<TValue>
      * @throws \ValueError
      */
     public function get(Model $model, string $key, mixed $value, array $attributes): ?CasesCollection
@@ -57,7 +56,7 @@ class CasesCollectionCast implements CastsAttributes
     /**
      * Transform the given JSON into a cases collection.
      *
-     * @return CasesCollection<TKey, TValue>
+     * @return CasesCollection<TValue>
      * @throws \ValueError
      */
     protected function getByJson(string $json): CasesCollection
@@ -66,7 +65,7 @@ class CasesCollectionCast implements CastsAttributes
         $cases = json_decode($json, true);
         $cases = array_unique($cases);
 
-        /** @var CasesCollection<TKey, TValue> */
+        /** @var CasesCollection<TValue> */
         return new CasesCollection(array_map(fn(string|int $value) => $this->enum::from($value), $cases));
     }
 

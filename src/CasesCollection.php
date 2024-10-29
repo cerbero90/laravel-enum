@@ -12,19 +12,16 @@ use Illuminate\Contracts\Support\Jsonable;
 use Illuminate\Support\Traits\Conditionable;
 use Illuminate\Support\Traits\Macroable;
 use Illuminate\Support\Traits\Tappable;
-use JsonSerializable;
-use Stringable;
 
 /**
  * The collection of enum cases.
  *
- * @template TKey of array-key
  * @template TValue
  *
- * @extends BaseCasesCollection<TKey, TValue>
- * @implements Arrayable<TKey, TValue>
+ * @extends BaseCasesCollection<TValue>
+ * @implements Arrayable<array-key, TValue>
  */
-class CasesCollection extends BaseCasesCollection implements Arrayable, Castable, Jsonable, JsonSerializable, Stringable
+class CasesCollection extends BaseCasesCollection implements Arrayable, Castable, Jsonable
 {
     use Conditionable;
     use Macroable;
@@ -34,7 +31,7 @@ class CasesCollection extends BaseCasesCollection implements Arrayable, Castable
      * Retrieve the caster to cast the collection.
      *
      * @param string[] $arguments
-     * @return CasesCollectionCast<TKey, TValue>
+     * @return CasesCollectionCast<TValue>
      */
     public static function castUsing(array $arguments): CastsAttributes
     {
@@ -52,14 +49,6 @@ class CasesCollection extends BaseCasesCollection implements Arrayable, Castable
     }
 
     /**
-     * Turn the collection into a string.
-     */
-    public function __toString(): string
-    {
-        return (string) $this->toJson();
-    }
-
-    /**
      * Turn the collection into a JSON.
      *
      * @param int $options
@@ -67,16 +56,6 @@ class CasesCollection extends BaseCasesCollection implements Arrayable, Castable
     public function toJson($options = 0): string|false
     {
         return json_encode($this->jsonSerialize(), $options);
-    }
-
-    /**
-     * Turn the collection into a JSON serializable array.
-     *
-     * @return array<TKey, mixed>
-     */
-    public function jsonSerialize(): array
-    {
-        return $this->enumIsBacked ? $this->values() : $this->names();
     }
 
     /**
