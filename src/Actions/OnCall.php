@@ -7,8 +7,11 @@ namespace Cerbero\LaravelEnum\Actions;
 use Cerbero\LaravelEnum\Enums;
 use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\Lang;
+use InvalidArgumentException;
 use Throwable;
 use UnitEnum;
+
+use function Cerbero\LaravelEnum\namespaceExists;
 
 /**
  * The logic to handle an inaccessible case method call.
@@ -18,24 +21,48 @@ class OnCall
     /**
      * Handle the call to an inaccessible case method.
      *
+     * @param UnitEnum $case
      * @param array<array-key, mixed> $arguments
+     * @throws InvalidArgumentException
      * @throws \ValueError
      */
     public function __invoke(object $case, string $name, array $arguments): mixed
     {
         try {
-            /** @phpstan-ignore method.notFound */
             $value = $case->resolveMetaAttribute($name);
         } catch (Throwable $e) {
-            /** @var UnitEnum $case */
-            $key = Enums::resolveTranslationKey($case, $name);
-
-            /** @var array{array<string, mixed>, ?string, bool} $arguments */
-            return ($key === $translation = Lang::get($key, ...$arguments)) ? throw $e : $translation;
+            return $this->translate($case, $name, $arguments) ?: throw $e;
         }
 
-        return is_string($value) && method_exists($value, '__invoke')
-            ? call_user_func_array(App::make($value), $arguments) /** @phpstan-ignore argument.type */
-            : $value;
+        return match (true) {
+            ! is_string($value) => $value, /** @phpstan-ignore-next-line argument.type */
+            method_exists($value, '__invoke') => call_user_func_array(App::make($value), $arguments),
+            namespaceExists($value) => App::make($value, $arguments),
+            default => $value,
+        };
+    }
+
+    /**
+     * Retrieve the translation of the given key.
+     *
+     * @param array<array-key, mixed> $arguments
+     * @throws InvalidArgumentException
+     */
+    protected function translate(UnitEnum $case, string $name, array $arguments): ?string
+    {
+        $key = Enums::resolveTranslationKey($case, $name);
+
+        if ($key === $translation = Lang::get($key, $arguments)) {
+            return null;
+        }
+
+        if ($arguments && array_is_list($arguments)) {
+            $method = sprintf('%s::%s->%s()', $case::class, $case->name, $name);
+
+            throw new InvalidArgumentException("The method {$method} must be called with its named arguments");
+        }
+
+        /** @var string $translation */
+        return $translation;
     }
 }
