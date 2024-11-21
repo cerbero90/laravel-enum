@@ -30,8 +30,9 @@ composer require cerbero/laravel-enum
 
 * [🏷️ Meta](#%EF%B8%8F-meta)
 * [🧺 Cases collection](#-cases-collection)
-* [🪄 Magic](#-magic)
-* [🪆 Encapsulation](#-encapsulation)
+* [🪄 Magic translation](#-magic-translation)
+* [💊 Encapsulation](#-encapsulation)
+* [🏺 Artisan commands](#-artisan-commands)
 
 This package provides all the functionalities of [🎲 Enum](https://github.com/cerbero90/enum) plus Laravel specific features.
 
@@ -53,7 +54,7 @@ enum Numbers: int
 
 ### 🏷️ Meta
 
-Laravel Enum enhances [Enum's meta](https://github.com/cerbero90/enum?tab=readme-ov-file#%EF%B8%8F-meta) by allowing us to attach meta with a class name. If the class is callable (i.e. it implements the `__invoke()` method), such class is resolved by the Laravel container and executed:
+Laravel Enum enhances [Enum's meta](https://github.com/cerbero90/enum?tab=readme-ov-file#%EF%B8%8F-meta) by allowing us to attach meta with a class name. Such class is resolved by the Laravel container when calling the related meta method:
 
 ```php
 use Cerbero\Enum\Attributes\Meta;
@@ -73,7 +74,65 @@ enum PayoutStatuses
 }
 ```
 
-In the above enum, each case defines a `handle` meta with a callable class. When a case calls its own `handle` meta, the related class is resolved and its `__invoke()` method is run with any parameter we pass:
+In the above enum, each case defines a `handler` meta with a class name. When a case calls its own `handler()` method, the related class is resolved out of the IoC container:
+
+```php
+// 🐢 instead of this
+$handler = match ($payout->status) {
+    PayoutStatuses::Sent => SentPayoutHandler::class,
+    PayoutStatuses::OnHold => OnHoldPayoutHandler::class,
+    PayoutStatuses::Declined => DeclinedPayoutHandler::class,
+};
+
+return Container::getInstance()->make($handler);
+
+
+// 🐇 we can do this
+return $payout->status->handler();
+```
+
+If we need to resolve a default class for most cases, we can attach the meta to the enum itself. The cases defining their own meta will override the default class:
+
+```php
+use Cerbero\Enum\Attributes\Meta;
+
+#[Meta(handler: DefaultPayoutHandler::class)]
+enum PayoutStatuses
+{
+    use Enumerates;
+
+    #[Meta(handler: SentPayoutHandler::class)]
+    case Sent;
+
+    case OnHold;
+
+    case Declined;
+}
+```
+
+In the above example all cases calling the `handler()` method resolve the `DefaultPayoutHandler` class, except the `Sent` case that resolves `SentPayoutHandler`.
+
+If the class to resolve is callable (i.e. it implements the `__invoke()` method), such class gets both resolved and executed:
+
+```php
+use Cerbero\Enum\Attributes\Meta;
+
+enum PayoutStatuses
+{
+    use Enumerates;
+
+    #[Meta(handle: SentPayoutHandler::class)]
+    case Sent;
+
+    #[Meta(handle: OnHoldPayoutHandler::class)]
+    case OnHold;
+
+    #[Meta(handle: DeclinedPayoutHandler::class)]
+    case Declined;
+}
+```
+
+In the above enum, each case defines a `handle` meta with a callable class. When a case calls its own `handle()` method, the related class gets resolved and its `__invoke()` method executed with any parameter we pass:
 
 ```php
 // 🐢 instead of this
@@ -92,7 +151,7 @@ return $handlePayout($payout);
 return $payout->status->handle($payout);
 ```
 
-If we need to run a default callable class for most cases, we can attach this meta to the enum itself. The cases defining their own meta will override the default callable class:
+If we need to run a default callable class for most cases, we can attach the meta to the enum itself. The cases defining their own meta will override the default callable class:
 
 ```php
 use Cerbero\Enum\Attributes\Meta;
@@ -111,7 +170,7 @@ enum PayoutStatuses
 }
 ```
 
-In the above example all cases calling the `handle()` method run the `DefaultPayoutHandler`, except the `Sent` case that runs the `SentPayoutHandler`.
+In the above example all cases calling the `handle()` method execute the `DefaultPayoutHandler` class, except the `Sent` case that runs the `SentPayoutHandler`.
 
 
 ### 🧺 Cases collection
@@ -224,7 +283,7 @@ $user->permissions; // CasesCollection[Permissions::CreatePost, Permissions::Upd
 
 The cases collection above is stored in the database as `3`, the result of the `OR` bitwise operator.
 
-### 🪄 Magic
+### 🪄 Magic translation
 
 On top of [Enum's magic](https://github.com/cerbero90/enum?tab=readme-ov-file#-magic), when a case calls an inaccessible method, and such case has no matching [meta](https://github.com/cerbero90/enum?tab=readme-ov-file#%EF%B8%8F-meta), Laravel Enum assumes that we want to access a translation:
 
@@ -253,7 +312,7 @@ Enums::translateFrom(function(UnitEnum $case, string $method) {
 
 The above logic will resolve the translation key with `custom.{enum namespace}.{case name}.{inaccessible method}`.
 
-Also, we can pass values to fill the placeholders in our translations:
+Also, we can pass named arguments to replace placeholders in our translations:
 
 ```php
 return [
@@ -265,11 +324,11 @@ return [
 ];
 
 // This is the case 1.
-Numbers::One->description(['value' => 1]);
+Numbers::One->description(value: 1);
 ```
 
 
-### 🪆 Encapsulation
+### 💊 Encapsulation
 
 Laravel Enum offers some extra traits to encapsulate Laravel features that deal with keys. We can hold our keys in an enum (each case is a key) and use Laravel features without ever having to repeat such keys.
 
@@ -280,7 +339,7 @@ The benefits of this approach are many:
 - reviewing/managing all our application keys in a central location
 - updating one key in one file instead of all its occurrences
 
-To encapsulate the Laravel session, we can create an enum holding all our session keys and let it use `EnumeratesSessionKeys`. Such enum can be either pure or backed:
+To encapsulate the Laravel session, we can create an enum holding all our session keys and let it use `EnumeratesSessionKeys`. The enum can be either pure or backed:
 
 ```php
 use Cerbero\LaravelEnum\Concerns\EnumeratesSessionKeys;
@@ -325,9 +384,9 @@ enum CacheKeys: string
 {
     use EnumeratesCacheKeys;
 
-    case PostComments = 'posts.*.comments';
+    case PostComments = 'posts.{int $postId}.comments';
     case Tags = 'tags';
-    case TeamMemberPosts = 'teams.*.users.*.posts';
+    case TeamMemberPosts = 'teams.{string $teamId}.users.{string $userId}.posts';
 }
 ```
 
@@ -351,7 +410,7 @@ $teamMemberPosts->rememberForever($callback);
 $teamMemberPosts->forget();
 ```
 
-We can invoke cases and pass parameters to resolve dynamic keys. Such parameters replace the `*` symbols in the cache keys:
+We can invoke cases and pass parameters to resolve dynamic keys. Such parameters replace the `{...}` placeholders in the cache keys:
 
 ```php
 CacheKeys::PostComments($postId)->exists();
@@ -359,6 +418,49 @@ CacheKeys::PostComments($postId)->exists();
 CacheKeys::Tags()->exists();
 
 CacheKeys::TeamMemberPosts($teamId, $userId)->exists();
+```
+
+
+### 🏺 Artisan commands
+
+A handy set of Artisan commands is provided out of the box to interact with enums seamlessly.
+
+We can annotate enums to ease the IDEs autocomplete of case methods, meta methods, translations, etc. by running the `enum:annotate` command:
+
+```bash
+php artisan enum:annotate
+```
+
+If we don't provide any argument, a prompt appears to select all the enums that we want to annotate. By default enums are searched in the `app/Enums` directory. If we need to scan other folders, we can define them thanks to `Enums::paths()`:
+
+```php
+use Cerbero\LaravelEnum\Enums;
+
+Enums::paths('app/Enums', 'domain/*/Enums');
+```
+
+In the above example, enums are searched in the `app/Enums` directory and in all `Enums` sub-folders belonging to `domain`, e.g. `domain/Posts/Enums`, `domain/Users/Enums`, etc.
+
+Alternatively we can provide one or more enums to the `enum:annotate` command. Both slashes and quoted backslashes are allowed to specify the enum namespaces:
+
+```bash
+php artisan enum:annotate App/Enums/Permissions 'App\Enums\PayoutStatuses'
+```
+
+If we want to annotate all the enums within the directories defined in `Enums::paths()`, we can simply add the option `--all`:
+
+```bash
+php artisan enum:annotate --all
+
+php artisan enum:annotate -a
+```
+
+Finally if we want to overwrite the method annotations already annotated on enums, we can add the option `--force`:
+
+```bash
+php artisan enum:annotate --force
+
+php artisan enum:annotate -f
 ```
 
 
