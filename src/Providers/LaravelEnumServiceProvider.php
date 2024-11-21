@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace Cerbero\LaravelEnum\Providers;
 
+use Cerbero\LaravelEnum\Commands;
+use Illuminate\Console\Command;
 use Illuminate\Support\ServiceProvider;
 
 /**
@@ -12,11 +14,22 @@ use Illuminate\Support\ServiceProvider;
 final class LaravelEnumServiceProvider extends ServiceProvider
 {
     /**
+     * The console commands to register.
+     *
+     * @var list<class-string<Command>>
+     */
+    private array $commands = [
+        Commands\EnumAnnotateCommand::class,
+    ];
+
+    /**
      * Bootstrap the package services.
      */
     public function boot(): void
     {
-        //
+        if ($this->app->runningInConsole()) {
+            $this->commands($this->commands);
+        }
     }
 
     /**
