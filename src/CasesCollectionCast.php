@@ -45,9 +45,9 @@ class CasesCollectionCast implements CastsAttributes
      */
     public function get(Model $model, string $key, mixed $value, array $attributes): ?CasesCollection
     {
+        /** @var ?CasesCollection<TValue> */
         return match (true) {
-            is_string($value) => $this->getByJson($value),
-            /** @phpstan-ignore-next-line binaryOp.invalid */
+            is_string($value) => $this->getByJson($value), /** @phpstan-ignore-next-line binaryOp.invalid */
             is_int($value) => $this->enum::filter(fn(BackedEnum $case) => ($value & $case->value) == $case->value),
             default => null,
         };
@@ -95,6 +95,7 @@ class CasesCollectionCast implements CastsAttributes
     {
         if (is_subclass_of($this->enum, Bitwise::class)) {
             return array_reduce($array, function (?int $carry, mixed $item): int {
+                /** @phpstan-ignore-next-line binaryOp.invalid */
                 return $carry |= $item instanceof BackedEnum ? $item->value : $item;
             });
         }

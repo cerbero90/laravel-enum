@@ -35,6 +35,7 @@ class CasesCollection extends BaseCasesCollection implements Arrayable, Castable
      */
     public static function castUsing(array $arguments): CastsAttributes
     {
+        /** @var CasesCollectionCast<TValue> */
         return new CasesCollectionCast($arguments[0] ?? '');
     }
 

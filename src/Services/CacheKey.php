@@ -80,6 +80,7 @@ final class CacheKey
      */
     public function increment(float|int $value = 1): float|int|bool
     {
+        /** @var float|int|bool */
         return Cache::increment($this->key, $value);
     }
 
@@ -88,6 +89,7 @@ final class CacheKey
      */
     public function decrement(float|int $value = 1): float|int|bool
     {
+        /** @var float|int|bool */
         return Cache::decrement($this->key, $value);
     }
 

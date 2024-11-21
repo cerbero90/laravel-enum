@@ -2,5 +2,8 @@ parameters:
     level: max
     paths:
         - src
+    ignoreErrors:
+        - '#Call to an undefined method UnitEnum::[a-zA-Z0-9\\_]+\(\)#'
+        - identifier: trait.unused
 includes:
     - phpstan-baseline.neon
