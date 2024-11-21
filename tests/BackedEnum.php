@@ -15,7 +15,7 @@ use Cerbero\LaravelEnum\Concerns\Enumerates;
  * @method string shape()
  * @method int handle(int $a, int $b)
  * @method string description()
- * @method string dynamic(array<string, mixed> $replace = [])
+ * @method string dynamic(mixed $value)
  */
 #[Meta(color: 'green', shape: 'square', handle: DefaultHandler::class)]
 enum BackedEnum: int

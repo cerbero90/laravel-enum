@@ -4,11 +4,11 @@ use Cerbero\LaravelEnum\BackedEnum;
 use Cerbero\LaravelEnum\Enums;
 
 it('translates when a meta attribute is not found', function() {
-    expect(BackedEnum::One->description(['ciao' => 'bye']))->toBe('My description');
+    expect(BackedEnum::One->description(ciao: 'bye'))->toBe('My description');
 });
 
 it('translates with placeholders', function() {
-    expect(BackedEnum::One->dynamic(['value' => 123]))->toBe('The value is 123');
+    expect(BackedEnum::One->dynamic(value: 123))->toBe('The value is 123');
 });
 
 it('translates from custom keys', function() {
