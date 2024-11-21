@@ -425,7 +425,7 @@ CacheKeys::TeamMemberPosts($teamId, $userId)->exists();
 
 A handy set of Artisan commands is provided out of the box to interact with enums seamlessly.
 
-We can annotate enums to ease the IDEs autocomplete of case methods, meta methods, translations, etc. by running the `enum:annotate` command:
+We can annotate enums to ease our IDE autocomplete for case methods, meta methods, translations, etc. by running the `enum:annotate` command:
 
 ```bash
 php artisan enum:annotate
