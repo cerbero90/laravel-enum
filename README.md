@@ -335,7 +335,7 @@ Laravel Enum offers some extra traits to encapsulate Laravel features that deal 
 The benefits of this approach are many:
 - no flaky strings around our codebase
 - no keys misspelling
-- IDE autocomplete
+- IDE autocompletion
 - reviewing/managing all our application keys in a central location
 - updating one key in one file instead of all its occurrences
 
@@ -425,7 +425,7 @@ CacheKeys::TeamMemberPosts($teamId, $userId)->exists();
 
 A handy set of Artisan commands is provided out of the box to interact with enums seamlessly.
 
-We can annotate enums to ease our IDE autocomplete for case methods, meta methods, translations, etc. by running the `enum:annotate` command:
+We can annotate enums to ease our IDE autocompletion for case methods, meta methods, translations, etc. by running the `enum:annotate` command:
 
 ```bash
 php artisan enum:annotate
