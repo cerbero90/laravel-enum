@@ -17,14 +17,15 @@
     }],
     "require": {
         "php": "^8.1",
-        "cerbero/enum": "^2.1",
+        "cerbero/enum": "^2.2",
+        "illuminate/console": ">=9.0",
         "illuminate/contracts": ">=9.0",
         "illuminate/support": ">=9.0"
     },
     "require-dev": {
         "orchestra/testbench": ">=7.0",
         "pestphp/pest": "^2.0",
-        "phpstan/phpstan": "^1.9",
+        "phpstan/phpstan": "^2.0",
         "scrutinizer/ocular": "^1.8",
         "squizlabs/php_codesniffer": "^3.0",
         "tightenco/duster": "^2.0"
@@ -32,11 +33,16 @@
     "autoload": {
         "psr-4": {
             "Cerbero\\LaravelEnum\\": "src"
-        }
+        },
+        "files": [
+            "helpers.php"
+        ]
     },
     "autoload-dev": {
         "psr-4": {
-            "Cerbero\\LaravelEnum\\": "tests"
+            "Cerbero\\LaravelEnum\\": "tests",
+            "App\\": "tests/Skeleton/app",
+            "Domain\\": "tests/Skeleton/domain"
         }
     },
     "scripts": {
