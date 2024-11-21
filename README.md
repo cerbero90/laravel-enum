@@ -63,13 +63,13 @@ enum PayoutStatuses
 {
     use Enumerates;
 
-    #[Meta(handle: SentPayoutHandler::class)]
+    #[Meta(handler: SentPayoutHandler::class)]
     case Sent;
 
-    #[Meta(handle: OnHoldPayoutHandler::class)]
+    #[Meta(handler: OnHoldPayoutHandler::class)]
     case OnHold;
 
-    #[Meta(handle: DeclinedPayoutHandler::class)]
+    #[Meta(handler: DeclinedPayoutHandler::class)]
     case Declined;
 }
 ```
