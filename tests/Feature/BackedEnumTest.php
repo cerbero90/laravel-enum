@@ -20,7 +20,7 @@ it('translates from custom keys', function() {
 });
 
 it('fails if a translation cannot be found', fn() => BackedEnum::One->unknownTranslation())
-    ->throws(ValueError::class, '"unknownTranslation" is not a valid meta for enum "Cerbero\LaravelEnum\BackedEnum"');
+    ->throws(ValueError::class, 'The case Cerbero\LaravelEnum\BackedEnum::One has no "unknownTranslation" meta set');
 
 it('handles the call to an inaccessible enum method', function() {
     expect(BackedEnum::One())->toBe(1);
