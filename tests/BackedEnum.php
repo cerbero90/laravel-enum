@@ -17,7 +17,7 @@ use Cerbero\LaravelEnum\Concerns\Enumerates;
  * @method string description()
  * @method string dynamic(mixed $value)
  */
-#[Meta(color: 'green', shape: 'square', handle: DefaultHandler::class)]
+#[Meta(color: 'green', shape: 'square', handle: DefaultHandler::class, processor: DefaultProcessor::class)]
 enum BackedEnum: int
 {
     use Enumerates;
@@ -25,7 +25,7 @@ enum BackedEnum: int
     #[Meta(color: 'red', shape: 'triangle')]
     case One = 1;
 
-    #[Meta(handle: TwoHandler::class)]
+    #[Meta(handle: TwoHandler::class, processor: TwoProcessor::class)]
     case Two = 2;
 
     #[Meta(color: 'blue', shape: 'circle')]

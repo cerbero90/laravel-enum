@@ -1,7 +1,9 @@
 <?php
 
 use Cerbero\LaravelEnum\BackedEnum;
+use Cerbero\LaravelEnum\DefaultProcessor;
 use Cerbero\LaravelEnum\Enums;
+use Cerbero\LaravelEnum\TwoProcessor;
 
 it('translates when a meta attribute is not found', function() {
     expect(BackedEnum::One->description(ciao: 'bye'))->toBe('My description');
@@ -18,6 +20,9 @@ it('translates from custom keys', function() {
 
     (fn() => self::$translateFrom = null)->bindTo(null, Enums::class)();
 });
+
+it('fails if translation values are not passed as named arguments', fn() => BackedEnum::One->dynamic(['value' => 123]))
+    ->throws(InvalidArgumentException::class, 'The method Cerbero\LaravelEnum\BackedEnum::One->dynamic() must be called with its named arguments');
 
 it('fails if a translation cannot be found', fn() => BackedEnum::One->unknownTranslation())
     ->throws(ValueError::class, 'The case Cerbero\LaravelEnum\BackedEnum::One has no "unknownTranslation" meta set');
@@ -45,12 +50,23 @@ it('handles the invocation of a case.', function() {
 });
 
 it('autowires a default meta', function() {
+    expect(BackedEnum::One->processor())
+        ->toBeInstanceOf(DefaultProcessor::class)
+        ->and(BackedEnum::Three->processor())
+        ->toBeInstanceOf(DefaultProcessor::class);
+});
+
+it('autowires a meta', function() {
+    expect(BackedEnum::Two->processor())->toBeInstanceOf(TwoProcessor::class);
+});
+
+it('autowires a default callable meta', function() {
     expect(BackedEnum::One->handle(1, 2))
         ->toBe(3)
         ->and(BackedEnum::Three->handle(1, 2))
         ->toBe(3);
 });
 
-it('autowires a meta', function() {
+it('autowires a callable meta', function() {
     expect(BackedEnum::Two->handle(1, 2))->toBe(123);
 });
