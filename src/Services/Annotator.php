@@ -4,7 +4,9 @@ declare(strict_types=1);
 
 namespace Cerbero\LaravelEnum\Services;
 
+use Cerbero\LaravelEnum\Concerns\Enumerates;
 use Cerbero\LaravelEnum\Data\MethodAnnotation;
+use InvalidArgumentException;
 
 /**
  * The enums annotator.
@@ -32,10 +34,16 @@ final class Annotator
      * @template TEnum
      *
      * @param class-string<TEnum> $enum
+     * @throws InvalidArgumentException
      */
     public function annotate(string $enum, bool $force = false): bool
     {
         $inspector = new Inspector($enum, $force);
+
+        if (! $inspector->uses(Enumerates::class)) {
+            throw new InvalidArgumentException("The enum {$enum} must use the trait " . Enumerates::class);
+        }
+
         $docBlock = $inspector->docBlock();
         $filename = $inspector->filename();
         $oldContent = (string) file_get_contents($filename);
