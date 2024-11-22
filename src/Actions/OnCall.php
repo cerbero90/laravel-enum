@@ -52,7 +52,7 @@ class OnCall
     {
         $key = Enums::resolveTranslationKey($case, $name);
 
-        if ($key === $translation = Lang::get($key, $arguments)) {
+        if ($key === Lang::get($key)) {
             return null;
         }
 
@@ -62,7 +62,7 @@ class OnCall
             throw new InvalidArgumentException("The method {$method} must be called with its named arguments");
         }
 
-        /** @var string $translation */
-        return $translation;
+        /** @var string */
+        return Lang::get($key, $arguments);
     }
 }
