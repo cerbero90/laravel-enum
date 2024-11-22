@@ -172,6 +172,9 @@ enum PayoutStatuses
 
 In the above example all cases calling the `handle()` method execute the `DefaultPayoutHandler` class, except the `Sent` case that runs the `SentPayoutHandler`.
 
+> [!TIP]
+> Our IDE can autocomplete meta methods thanks to the [`enum:annotate` command](#-artisan-commands).
+
 
 ### 🧺 Cases collection
 
@@ -327,6 +330,9 @@ return [
 Numbers::One->description(value: 1);
 ```
 
+> [!TIP]
+> Our IDE can autocomplete translation methods thanks to the [`enum:annotate` command](#-artisan-commands).
+
 
 ### 💊 Encapsulation
 
@@ -390,7 +396,7 @@ enum CacheKeys: string
 }
 ```
 
-The `EnumeratesCacheKeys` trait also uses `Enumerates`, hence all the features of this package. We can now call all the Laravel cache methods directly from our cases:
+The `EnumeratesCacheKeys` trait also uses `Enumerates`, hence all the features of this package. We can now call all the Laravel cache methods after instantiating our cases:
 
 ```php
 $teamMemberPosts = CacheKeys::TeamMemberPosts($teamId, $userId);
@@ -410,7 +416,7 @@ $teamMemberPosts->rememberForever($callback);
 $teamMemberPosts->forget();
 ```
 
-We can invoke cases and pass parameters to resolve dynamic keys. Such parameters replace the `{...}` placeholders in the cache keys:
+We can instantiate our cases statically and pass parameters to resolve dynamic keys. Such parameters replace the `{...}` placeholders in the cache keys:
 
 ```php
 CacheKeys::PostComments($postId)->exists();
@@ -419,6 +425,9 @@ CacheKeys::Tags()->exists();
 
 CacheKeys::TeamMemberPosts($teamId, $userId)->exists();
 ```
+
+> [!TIP]
+> Our IDE can autocomplete cache keys static methods thanks to the [`enum:annotate` command](#-artisan-commands).
 
 
 ### 🏺 Artisan commands
