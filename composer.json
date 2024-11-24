@@ -42,7 +42,8 @@
         "psr-4": {
             "Cerbero\\LaravelEnum\\": "tests",
             "App\\": "tests/Skeleton/app",
-            "Domain\\": "tests/Skeleton/domain"
+            "Domain\\": "tests/Skeleton/domain",
+            "Unloaded\\": "tests/Skeleton/unloaded"
         }
     },
     "scripts": {

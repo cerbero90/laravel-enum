@@ -15,10 +15,9 @@ it('yields the namespace of enums in custom paths', function() {
     expect(Enums::namespaces())->sequence(
         'App\Enums\Enum1',
         'App\Enums\Enum2',
-        'Domain\Posts\Enums\Enum1',
-        'Domain\Posts\Enums\Enum2',
-        'Domain\Users\Enums\Enum1',
-        'Domain\Users\Enums\Enum2',
+        'Domain\Common\Enums\CacheKeys',
+        'Domain\Common\Enums\SessionKeys',
+        'Domain\Payouts\Enums\PayoutStatuses',
     );
 
     // reset the initial state

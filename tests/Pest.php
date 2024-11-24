@@ -24,8 +24,29 @@ uses(Cerbero\LaravelEnum\TestCase::class)->in('Feature');
 |
 */
 
-expect()->extend('toBeOne', function () {
-    return $this->toBe(1);
+expect()->extend('toAnnotate', function (array $enums) {
+    $oldContents = [];
+
+    foreach ($enums as $enum) {
+        $filename = (new ReflectionEnum($enum))->getFileName();
+        $oldContents[$filename] = file_get_contents($filename);
+
+        $this->value->expectsOutputToContain($enum);
+    }
+
+    try {
+        $this->value->assertExitCode(0)->run();
+
+        foreach ($oldContents as $filename => $oldContent) {
+            $stub = __DIR__ . '/stubs/' . basename($filename, '.php') . '.stub';
+
+            expect(file_get_contents($filename))->toBe(file_get_contents($stub));
+        }
+    } finally {
+        foreach ($oldContents as $filename => $oldContent) {
+            file_put_contents($filename, $oldContent);
+        }
+    }
 });
 
 /*

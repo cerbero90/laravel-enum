@@ -17,6 +17,16 @@ class TestCase extends OrchestraTestCase
     use LazilyRefreshDatabase;
 
     /**
+     * Retrieve the application base path.
+     *
+     * @return string
+     */
+    public static function applicationBasePath()
+    {
+        return __DIR__ . '/Skeleton';
+    }
+
+    /**
      * Retrieve the package providers.
      *
      * @param \Illuminate\Foundation\Application $app
