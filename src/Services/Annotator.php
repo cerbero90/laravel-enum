@@ -16,7 +16,7 @@ final class Annotator
     /**
      * The regular expression to extract the use statements.
      */
-    public const RE_USE_STATEMENTS = '~^use[\s\S]+(?=^use).+~im';
+    public const RE_USE_STATEMENTS = '~^use(?:[\s\S]+(?=^use))?.+~im';
 
     /**
      * The regular expression to extract the enum declaring line with potential attributes.
@@ -26,7 +26,7 @@ final class Annotator
     /**
      * The regular expression to extract the method annotations.
      */
-    public const RE_METHOD_ANNOTATIONS = '~^ \* @method[\s\S]+(?=@method).+~im';
+    public const RE_METHOD_ANNOTATIONS = '~^ \* @method(?:[\s\S]+(?=@method))?.+~im';
 
     /**
      * Annotate the given enum.
@@ -44,10 +44,14 @@ final class Annotator
             throw new InvalidArgumentException("The enum {$enum} must use the trait " . Enumerates::class);
         }
 
+        if (empty($annotations = $inspector->methodAnnotations())) {
+            return true;
+        }
+
         $docBlock = $inspector->docBlock();
         $filename = $inspector->filename();
         $oldContent = (string) file_get_contents($filename);
-        $methodAnnotations = $this->formatMethodAnnotations($inspector->methodAnnotations());
+        $methodAnnotations = $this->formatMethodAnnotations($annotations);
         $useStatements = $this->formatUseStatements($inspector->useStatements());
         $newContent = (string) preg_replace(self::RE_USE_STATEMENTS, $useStatements, $oldContent, 1);
 
