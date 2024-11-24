@@ -28,7 +28,10 @@ final class EnumAnnotateCommand extends Command
      *
      * @var string
      */
-    protected $signature = 'enum:annotate {enums?*} {--a|all} {--f|force}';
+    protected $signature = 'enum:annotate
+                            {enums?* : The enums to annotate}
+                            {--a|all : Whether all enums should be annotated}
+                            {--f|force : Whether existing annotations should be overwritten}';
 
     /**
      * Handle the command.
