@@ -174,6 +174,8 @@ In the above example all cases calling the `handle()` method execute the `Defaul
 
 > [!TIP]
 > Our IDE can autocomplete meta methods thanks to the [`enum:annotate` command](#-artisan-commands).
+>
+> Different class names of a meta are annotated by finding the interface or parent class they have in common.
 
 
 ### 🧺 Cases collection
@@ -450,18 +452,18 @@ Enums::paths('app/Enums', 'domain/*/Enums');
 
 In the above example, enums are searched in the `app/Enums` directory and in all `Enums` sub-folders belonging to `domain`, e.g. `domain/Posts/Enums`, `domain/Users/Enums`, etc.
 
-Alternatively we can provide one or more enums to the `enum:annotate` command. Both slashes and quoted backslashes are allowed to specify the enum namespaces:
-
-```bash
-php artisan enum:annotate App/Enums/Permissions 'App\Enums\PayoutStatuses'
-```
-
 If we want to annotate all the enums within the directories defined in `Enums::paths()`, we can simply add the option `--all`:
 
 ```bash
 php artisan enum:annotate --all
 
 php artisan enum:annotate -a
+```
+
+Alternatively we can provide one or more enums to the `enum:annotate` command. Both slashes and quoted backslashes are allowed to specify the enum namespaces:
+
+```bash
+php artisan enum:annotate App/Enums/Permissions 'App\Enums\PayoutStatuses'
 ```
 
 Finally if we want to overwrite the method annotations already annotated on enums, we can add the option `--force`:
