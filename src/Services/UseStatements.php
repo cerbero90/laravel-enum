@@ -76,7 +76,7 @@ final class UseStatements implements IteratorAggregate
         $useStatements = [];
 
         foreach (yieldLines($this->inspector->filename()) as $line) {
-            if (strpos('enum', $line) === 0) {
+            if (strpos($line, 'enum') === 0) {
                 break;
             }
 
