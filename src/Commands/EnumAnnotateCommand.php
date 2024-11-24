@@ -52,8 +52,8 @@ final class EnumAnnotateCommand extends Command
             }
 
             $message = $succeeded
-                ? "<bg=#16a34a;fg=#fff;options=bold> DONE </> {$enum}\n"
-                : "<bg=#e11d48;fg=#fff;options=bold> FAIL </> {$enum} <fg=#e11d48>{$e?->getMessage()}</>\n";
+                ? "<bg=#a3e635;fg=#3f6212;options=bold> DONE </> {$enum}\n"
+                : "<bg=#f87171;fg=#991b1b;options=bold> FAIL </> {$enum} <fg=#dc2626>{$e?->getMessage()}</>\n";
 
             $this->line($message);
         }
