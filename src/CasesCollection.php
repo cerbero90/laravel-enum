@@ -30,7 +30,7 @@ class CasesCollection extends BaseCasesCollection implements Arrayable, Castable
     /**
      * Retrieve the caster to cast the collection.
      *
-     * @param string[] $arguments
+     * @param list<string> $arguments
      * @return CasesCollectionCast<TValue>
      */
     public static function castUsing(array $arguments): CastsAttributes
