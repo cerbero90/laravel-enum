@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace Cerbero\LaravelEnum\Concerns;
 
 use Cerbero\LaravelEnum\Services\CacheKey;
-use Illuminate\Support\Str;
 
 /**
  * The trait to enumerate cache keys.
@@ -19,7 +18,7 @@ trait EnumeratesCacheKeys
      */
     public static function __callStatic(string $name, array $arguments): mixed
     {
-        $key = Str::replaceArray('*', $arguments, self::fromName($name)->value);
+        $key = preg_replace_array('~({[^}]+})~', $arguments, self::fromName($name)->value);
 
         return new CacheKey($key);
     }

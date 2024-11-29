@@ -16,5 +16,5 @@ enum CacheKeys: string
 {
     use EnumeratesCacheKeys;
 
-    case PinnedPosts = 'users.*.pinned_posts';
+    case PinnedPosts = 'teams.{int $teamId}.users.{string $userId}.pinned_posts';
 }
