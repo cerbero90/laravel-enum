@@ -73,7 +73,7 @@ final class EnumAnnotateCommand extends Command
     {
         if ($enums = (array) $this->argument('enums')) {
             /** @var list<string> $enums */
-            $namespaces = array_map(fn(string $enum) => str_replace('/', '\\', $enum), $enums);
+            $namespaces = array_map(fn(string $enum) => strtr($enum, '/', '\\'), $enums);
 
             /** @var list<class-string<\UnitEnum>> */
             return array_unique(array_filter($namespaces, 'enum_exists'));
