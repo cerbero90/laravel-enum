@@ -65,10 +65,11 @@ expect()->extend('toContainIgnoreEol', function (string $path) {
 expect()->extend('toGenerate', function (string $enum) {
     expect(class_exists($enum))->toBeFalse();
 
+    $filename = namespaceToPath($enum);
+
     try {
         $this->value->expectsOutputToContain($enum)->assertExitCode(0)->run();
 
-        $filename = namespaceToPath($enum);
         $stub = __DIR__ . '/stubs/make/' . class_basename($enum) . '.stub';
 
         expect($filename)->toContainIgnoreEol($stub);
