@@ -9,11 +9,11 @@ use Cerbero\LaravelEnum\Concerns\EnumeratesSessionKeys;
 /**
  * The enum to enumerate session keys.
  */
-enum SessionKeys
+enum SessionKeys: string
 {
     use EnumeratesSessionKeys;
 
-    case CartItems;
-    case OnboardingStep;
-    case PageViews;
+    case CartItems = 'CartItems';
+    case OnboardingStep = 'OnboardingStep';
+    case FormsData = 'Forms.{int $formId}.Data';
 }

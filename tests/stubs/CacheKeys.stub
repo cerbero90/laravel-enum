@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace Domain\Common\Enums;
 
+use Cerbero\LaravelEnum\Capsules\CacheKey;
 use Cerbero\LaravelEnum\Concerns\EnumeratesCacheKeys;
-use Cerbero\LaravelEnum\Services\CacheKey;
 
 /**
  * The enum to enumerate cache keys.

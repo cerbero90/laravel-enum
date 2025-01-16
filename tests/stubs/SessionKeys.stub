@@ -4,20 +4,21 @@ declare(strict_types=1);
 
 namespace Domain\Common\Enums;
 
+use Cerbero\LaravelEnum\Capsules\SessionKey;
 use Cerbero\LaravelEnum\Concerns\EnumeratesSessionKeys;
 
 /**
  * The enum to enumerate session keys.
  *
- * @method static string CartItems()
- * @method static string OnboardingStep()
- * @method static string PageViews()
+ * @method static SessionKey CartItems()
+ * @method static SessionKey FormsData(int $formId)
+ * @method static SessionKey OnboardingStep()
  */
-enum SessionKeys
+enum SessionKeys: string
 {
     use EnumeratesSessionKeys;
 
-    case CartItems;
-    case OnboardingStep;
-    case PageViews;
+    case CartItems = 'CartItems';
+    case OnboardingStep = 'OnboardingStep';
+    case FormsData = 'Forms.{int $formId}.Data';
 }

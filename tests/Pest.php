@@ -11,6 +11,11 @@
 |
 */
 
+use Cerbero\LaravelEnum\Enums;
+
+use function Cerbero\Enum\namespaceToPath;
+use function Cerbero\Enum\path;
+
 uses(Cerbero\LaravelEnum\TestCase::class)->in('Feature');
 
 /*
@@ -40,11 +45,53 @@ expect()->extend('toAnnotate', function (array $enums) {
         foreach ($oldContents as $filename => $oldContent) {
             $stub = __DIR__ . '/stubs/' . basename($filename, '.php') . '.stub';
 
-            expect(file_get_contents($filename))->toBe(file_get_contents($stub));
+            expect($filename)->toContainIgnoreEol($stub);
         }
     } finally {
         foreach ($oldContents as $filename => $oldContent) {
             file_put_contents($filename, $oldContent);
+        }
+    }
+});
+
+expect()->extend('toContainIgnoreEol', function (string $path) {
+    // normalize content to avoid end-of-line incompatibility between OS
+    $actualContent = str_replace("\r\n", "\n", file_get_contents(path($this->value)));
+    $expectedContent = str_replace("\r\n", "\n", file_get_contents(path($path)));
+
+    expect($actualContent)->toBe($expectedContent);
+});
+
+expect()->extend('toGenerate', function (string $enum) {
+    expect(class_exists($enum))->toBeFalse();
+
+    try {
+        $this->value->expectsOutputToContain($enum)->assertExitCode(0)->run();
+
+        $filename = namespaceToPath($enum);
+        $stub = __DIR__ . '/stubs/make/' . class_basename($enum) . '.stub';
+
+        expect($filename)->toContainIgnoreEol($stub);
+    } finally {
+        file_exists($filename) && unlink($filename);
+    }
+});
+
+expect()->extend('toTypeScript', function (array $enums) {
+    $paths = [];
+
+    try {
+        $this->value->expectsOutputToContain($enums[0])->assertExitCode(0)->run();
+
+        foreach ($enums as $enum) {
+            $paths[] = $path = Enums::basePath(Enums::typeScript($enum));
+            $stub = __DIR__ . '/stubs/ts/enums.stub';
+
+            expect($path)->toContainIgnoreEol($stub);
+        }
+    } finally {
+        foreach ($paths as $path) {
+            file_exists($path) && unlink($path);
         }
     }
 });

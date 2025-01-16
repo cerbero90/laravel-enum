@@ -10,7 +10,7 @@ it('yields the namespace of enums in the default path', function() {
 });
 
 it('yields the namespace of enums in custom paths', function() {
-    Enums::paths('app/Enums', 'domain/*/Enums');
+    Enums::setPaths('app/Enums', 'domain/*/Enums');
 
     expect(Enums::namespaces())->sequence(
         'App\Enums\Enum1',
@@ -21,5 +21,5 @@ it('yields the namespace of enums in custom paths', function() {
     );
 
     // reset the initial state
-    Enums::paths('app/Enums');
+    Enums::setPaths('app/Enums');
 });

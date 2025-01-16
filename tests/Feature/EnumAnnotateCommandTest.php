@@ -16,14 +16,14 @@ it('warns that no enums were annotated if invalid enums are provided', function(
 });
 
 it('warns that no enums were annotated if no enums can be found', function() {
-    Enums::paths('noEnums');
+    Enums::setPaths('noEnums');
 
     $this
         ->artisan('enum:annotate', ['--all' => true])
         ->expectsOutput('No enums to annotate.')
         ->assertExitCode(0);
 
-    Enums::paths('app/Enums'); // reset default path
+    Enums::setPaths('app/Enums');
 });
 
 it('displays an error message when it fails', function() {
@@ -34,7 +34,7 @@ it('displays an error message when it fails', function() {
 });
 
 it('annotates all the discoverable enums', function() {
-    Enums::paths('app/Enums', 'domain/*/Enums');
+    Enums::setPaths('app/Enums', 'domain/*/Enums');
 
     expect($this->artisan('enum:annotate', ['--all' => true]))->toAnnotate([
         Enum1::class,
@@ -44,5 +44,5 @@ it('annotates all the discoverable enums', function() {
         PayoutStatuses::class,
     ]);
 
-    Enums::paths('app/Enums'); // reset default path
+    Enums::setPaths('app/Enums'); // reset default path
 });

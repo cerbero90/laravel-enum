@@ -9,9 +9,9 @@ use Illuminate\Database\Eloquent\Model;
 /**
  * The testing user model.
  *
- * @property ?CasesCollection<int, BitwiseEnum> $bitwise
- * @property ?CasesCollection<int, BackedEnum> $numbers
- * @property ?CasesCollection<int, PureEnum> $pureNumbers
+ * @property ?CasesCollection<BitwiseEnum> $bitwise
+ * @property ?CasesCollection<BackedEnum> $numbers
+ * @property ?CasesCollection<PureEnum> $pureNumbers
  */
 final class User extends Model
 {
