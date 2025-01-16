@@ -51,6 +51,7 @@ final class Inspector extends BaseInspector
     {
         foreach ($this->capsules as $trait => $capsule) {
             if ($this->uses($trait)) {
+                /** @var \BackedEnum $case */
                 return MethodAnnotation::forCapsule($case, $capsule);
             }
         }
@@ -75,6 +76,7 @@ final class Inspector extends BaseInspector
      */
     public function methodAnnotations(bool $includeExisting = true): array
     {
+        /** @var array<string, MethodAnnotation> */
         return $this->methodAnnotations ??= [...new MethodAnnotations($this, $includeExisting)];
     }
 }

@@ -79,9 +79,11 @@ final class EnumMakeCommand extends Command
      */
     private function enum(): string
     {
+        /** @var string $raw */
         $raw = $this->argument('enum') ?: text('The namespace of the enum', 'App\Enums\Permissions', required: true);
 
-        return strtr((string) $raw, '/', '\\');
+        /** @var class-string<\UnitEnum> */
+        return strtr($raw, '/', '\\');
     }
 
     /**
@@ -92,8 +94,12 @@ final class EnumMakeCommand extends Command
     private function backed(): ?Backed
     {
         if ($this->argument('enum') === null) {
-            $name = select('How cases should be backed', Backed::pluck('label', 'name'));
+            /** @phpstan-ignore argument.templateType */
+            $options = Backed::pluck('label', 'name');
+            /** @var array<string, string> $options */
+            $name = select('How cases should be backed', $options);
 
+            /** @var string $name */
             return Backed::from($name);
         }
 
@@ -101,6 +107,7 @@ final class EnumMakeCommand extends Command
             return Backed::pure;
         }
 
+        /** @var string $name */
         return Backed::tryFrom($name);
     }
 
@@ -113,7 +120,7 @@ final class EnumMakeCommand extends Command
     {
         $placeholder = $backed->is(Backed::custom) ? "Case1=value1\nCase2=value2" : "Case1\nCase2";
 
-        /** @var list<string> $cases */
+        /** @var list<string> */
         return $this->argument('cases')
             ?: explode(PHP_EOL, trim(textarea('The cases (one per line)', $placeholder, required: true)));
     }

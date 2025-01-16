@@ -67,6 +67,7 @@ final class EnumTsCommand extends Command
             ! empty($enums = (array) $this->argument('enums')) => normalizeEnums($enums),
             empty($enums = [...Enums::namespaces()]) => [],
             $this->option('all') => $enums,
+            /** @phpstan-ignore argument.type */
             default => multiselect('Enums to synchronize:', $enums, required: true, hint: 'Press space to select.'),
         };
     }

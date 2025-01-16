@@ -9,7 +9,7 @@ use Cerbero\Enum\Services\UseStatements as BaseUseStatements;
 /**
  * The use statements collector.
  *
- * @property-read Inspector $inspector
+ * @property-read Inspector<\UnitEnum> $inspector
  */
 final class UseStatements extends BaseUseStatements
 {

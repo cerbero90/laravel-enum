@@ -14,9 +14,9 @@ use UnitEnum;
 /**
  * The cases collection cast.
  *
- * @template TValue
+ * @template TEnum of UnitEnum
  *
- * @implements CastsAttributes<?CasesCollection<TValue>, mixed>
+ * @implements CastsAttributes<?CasesCollection<TEnum>, mixed>
  */
 class CasesCollectionCast implements CastsAttributes
 {
@@ -40,12 +40,12 @@ class CasesCollectionCast implements CastsAttributes
      *
      * @param string|int|null $value
      * @param array<string, mixed> $attributes
-     * @return ?CasesCollection<TValue>
+     * @return ?CasesCollection<TEnum>
      * @throws \ValueError
      */
     public function get(Model $model, string $key, mixed $value, array $attributes): ?CasesCollection
     {
-        /** @var ?CasesCollection<TValue> */
+        /** @var ?CasesCollection<TEnum> */
         return match (true) {
             is_string($value) => $this->getByJson($value), /** @phpstan-ignore-next-line binaryOp.invalid */
             is_int($value) => $this->enum::filter(fn(BackedEnum $case) => ($value & $case->value) == $case->value),
@@ -56,17 +56,18 @@ class CasesCollectionCast implements CastsAttributes
     /**
      * Transform the given JSON into a cases collection.
      *
-     * @return CasesCollection<TValue>
+     * @return CasesCollection<TEnum>
      * @throws \ValueError
      */
     protected function getByJson(string $json): CasesCollection
     {
-        /** @var list<string|int> $cases */
-        $cases = json_decode($json, true);
-        $cases = array_unique($cases);
+        /** @var list<string|int> $rawCases */
+        $rawCases = array_unique((array) json_decode($json, true));
+        /** @var TEnum[] $cases */
+        $cases = array_map(fn(string|int $value) => $this->enum::from($value), $rawCases);
 
-        /** @var CasesCollection<TValue> */
-        return new CasesCollection(array_map(fn(string|int $value) => $this->enum::from($value), $cases));
+        /** @var CasesCollection<TEnum> */
+        return new CasesCollection($cases);
     }
 
     /**

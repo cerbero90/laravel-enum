@@ -106,6 +106,7 @@ final class SessionKey
      */
     public function increment(float|int $amount = 1): float|int
     {
+        /** @var float|int @phpstan-ignore argument.type */
         return Session::increment($this->key, $amount);
     }
 
@@ -114,6 +115,7 @@ final class SessionKey
      */
     public function decrement(float|int $amount = 1): float|int
     {
+        /** @var float|int @phpstan-ignore argument.type */
         return Session::decrement($this->key, $amount);
     }
 

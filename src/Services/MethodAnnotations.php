@@ -14,7 +14,7 @@ use function Cerbero\LaravelEnum\metaReturnType;
 /**
  * The method annotations collector.
  *
- * @property-read Inspector $inspector
+ * @property-read Inspector<\UnitEnum> $inspector
  */
 final class MethodAnnotations extends BaseMethodAnnotations
 {
@@ -25,6 +25,7 @@ final class MethodAnnotations extends BaseMethodAnnotations
      */
     public function all(): array
     {
+        /** @var array<string, MethodAnnotation> */
         return [
             ...$this->forCaseNames(),
             ...$this->forMetaAttributes(),

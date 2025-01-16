@@ -67,6 +67,7 @@ final class EnumAnnotateCommand extends Command
             ! empty($enums = (array) $this->argument('enums')) => normalizeEnums($enums),
             empty($enums = [...Enums::namespaces()]) => [],
             $this->option('all') => $enums,
+            /** @phpstan-ignore argument.type */
             default => multiselect('Enums to annotate:', $enums, required: true, hint: 'Press space to select.'),
         };
     }

@@ -20,6 +20,7 @@ final class Annotator extends BaseAnnotator
      *
      * @param class-string<TEnum> $enum
      * @throws \InvalidArgumentException
+     * @phpstan-ignore property.phpDocType
      */
     public function __construct(protected string $enum)
     {

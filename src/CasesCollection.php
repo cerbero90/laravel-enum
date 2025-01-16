@@ -16,7 +16,7 @@ use Illuminate\Support\Traits\Tappable;
 /**
  * The collection of enum cases.
  *
- * @template-covariant TEnum of \UnitEnum
+ * @template TEnum of \UnitEnum
  *
  * @extends BaseCasesCollection<TEnum>
  * @implements Arrayable<array-key, TEnum>
