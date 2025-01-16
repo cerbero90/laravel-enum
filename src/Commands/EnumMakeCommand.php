@@ -63,7 +63,7 @@ final class EnumMakeCommand extends Command
         $generator = new Generator($enum, $this->cases($backed), $backed);
         $typeScript = !! $this->option('typescript');
 
-        $succeeded = output($this->output, $enum, function() use ($generator, $enum, $force, $typeScript) {
+        $succeeded = output($this->output, $enum, function () use ($generator, $enum, $force, $typeScript) {
             return $generator->generate($force)
                 && runAnnotate($enum, $force)
                 && ($typeScript ? runTs($enum, $force) : true);
