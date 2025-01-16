@@ -1,9 +1,6 @@
 <?php
 
-use Laravel\Prompts\Prompt;
-use Laravel\Prompts\SelectPrompt;
 use Laravel\Prompts\TextareaPrompt;
-use Laravel\Prompts\TextPrompt;
 
 it('succeeds if an enum already exists', function() {
     $this
@@ -33,19 +30,15 @@ it('generates enums', function(string $enum, ?string $backed) {
     ['SubDirectory\Generated3', null],
 ]);
 
-// it('generates enums with prompts', function() {
-//     // Currently textarea() of Laravel Prompts seems to have some testing issues.
-//     // Apparently the method expectsQuestion() does not test textarea rightly.
-//     // In alternative, we fallback the prompt with the expected user input.
-//     // Prompt::fallbackWhen(true);
-//     // TextPrompt::fallbackUsing(fn() => 'App\Enums\Generated1');
-//     // SelectPrompt::fallbackUsing(fn() => 'bitwise');
-//     // TextareaPrompt::fallbackUsing(fn() => 'CaseOne' . PHP_EOL . 'CaseTwo');
+it('generates enums with prompts', function() {
+    // Currently textarea() of Laravel Prompts seems to have some testing issues.
+    // Apparently the method expectsQuestion() does not test textarea rightly.
+    // In alternative, we fallback the prompt with the expected user input.
+    TextareaPrompt::fallbackUsing(fn() => 'CaseOne' . PHP_EOL . 'CaseTwo');
 
-//     // $command = $this->artisan('enum:make')
-//     //     ->expectsQuestion('The namespace of the enum', 'App\Enums\Generated1')
-//     //     ->expectsQuestion('How cases should be backed', 'bitwise')
-//     //     ->expectsQuestion('The cases (one per line)', 'CaseOne' . PHP_EOL . 'CaseTwo');
+    $command = $this->artisan('enum:make')
+        ->expectsQuestion('The namespace of the enum', 'App\Enums\Generated1')
+        ->expectsQuestion('How cases should be backed', 'bitwise');
 
-//     expect($this->artisan('enum:make'))->toGenerate('App\Enums\Generated1');
-// })->only();
+    expect($command)->toGenerate('App\Enums\Generated1');
+});
