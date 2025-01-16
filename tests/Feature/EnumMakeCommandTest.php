@@ -31,10 +31,14 @@ it('generates enums', function(string $enum, ?string $backed) {
 ]);
 
 it('generates enums with prompts', function() {
-    $command = $this->artisan('enum:make')
+    // Currently textarea() of Laravel Prompts seems to have some testing issues.
+    // Apparently the method expectsQuestion() does not test textarea rightly.
+    // In alternative, we fallback the prompt with the expected user input.
+    TextareaPrompt::fallbackUsing(fn() => 'CaseOne' . PHP_EOL . 'CaseTwo');
+
+    $command = $this->artisan('enum:make', ['cases' => ['CaseOne', 'CaseTwo']])
         ->expectsQuestion('The namespace of the enum', 'App\Enums\Generated1')
-        ->expectsQuestion('How cases should be backed', 'bitwise')
-        ->expectsQuestion('The cases (one per line)', 'CaseOne' . PHP_EOL . 'CaseTwo');
+        ->expectsQuestion('How cases should be backed', 'bitwise');
 
     expect($command)->toGenerate('App\Enums\Generated1');
 });
