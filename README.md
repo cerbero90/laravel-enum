@@ -32,10 +32,10 @@ composer require cerbero/laravel-enum
 * [🧺 Cases collection](#-cases-collection)
 * [🪄 Magic translation](#-magic-translation)
 * [💊 Encapsulation](#-encapsulation)
-* [🦾 Artisan commands](#%EF%B8%8F-enum-annotate)
-  * [🗒️ enum:annotate](#%EF%B8%8F-enum-annotate)
-  * [🏗️ enum:make](#%EF%B8%8F-enum-make)
-  * [💙 enum:ts](#-enum-ts)
+* [🦾 Artisan commands](#%EF%B8%8F-enumannotate)
+  * [🗒️ enum:annotate](#%EF%B8%8F-enumannotate)
+  * [🏗️ enum:make](#%EF%B8%8F-enummake)
+  * [💙 enum:ts](#-enumts)
 
 This package provides all the functionalities of [🎲 Enum](https://github.com/cerbero90/enum) plus Laravel-specific features.
 
@@ -176,7 +176,7 @@ enum PayoutStatuses
 In the above example all cases calling the `handle()` method execute the `DefaultPayoutHandler` class, except for the `Sent` case that runs the `SentPayoutHandler`.
 
 > [!TIP]
-> Our IDE can autocomplete meta methods thanks to the [`enum:annotate` command](#%EF%B8%8F-enum-annotate).
+> Our IDE can autocomplete meta methods thanks to the [`enum:annotate` command](#%EF%B8%8F-enumannotate).
 >
 > Class names of a meta are annotated by finding the interface or parent class they have in common.
 
@@ -336,7 +336,7 @@ Numbers::One->description(value: 1);
 ```
 
 > [!TIP]
-> Our IDE can autocomplete translation methods thanks to the [`enum:annotate` command](#%EF%B8%8F-enum-annotate).
+> Our IDE can autocomplete translation methods thanks to the [`enum:annotate` command](#%EF%B8%8F-enumannotate).
 
 
 ### 💊 Encapsulation
@@ -432,22 +432,30 @@ CacheKeys::TeamMemberPosts($teamId, $userId)->exists();
 ```
 
 > [!TIP]
-> Our IDE can autocomplete cache keys static methods thanks to the [`enum:annotate` command](#%EF%B8%8F-enum-annotate).
+> Our IDE can autocomplete cache keys static methods thanks to the [`enum:annotate` command](#%EF%B8%8F-enumannotate).
 
 
 ### 🦾 Artisan commands
 
 A handy set of Artisan commands is provided out of the box to interact with enums seamlessly.
 
+Some commands generate enums or related files. If we want to customize the generated files, we can publish the stubs:
+
+```bash
+php artisan vendor:publish --tag=laravel-enum-stubs
+```
+
+The stubs can be modified in the `stubs/laravel-enum` directory, in the root of our application.
+
 #### 🗒️ enum:annotate
 
-We can annotate enums to ease our IDE autocompletion for static case methods, meta methods, translations, etc. by running the `enum:annotate` command:
+IDEs can autocomplete static case methods, meta methods, translations, etc. by running the `enum:annotate` command:
 
 ```bash
 php artisan enum:annotate
 ```
 
-If we don't provide any argument, a prompt appears to select all the enums that we want to annotate. By default enums are searched in the `app/Enums` directory. If we need to scan other folders, we can define them by calling `Enums::setPaths()`:
+If we don't provide any argument, a prompt appears to select all the enums that we want to annotate. By default enums get searched in the `app/Enums` directory. If we need to scan other folders, we can define them by calling `Enums::setPaths()`:
 
 ```php
 use Cerbero\LaravelEnum\Enums;
@@ -485,6 +493,131 @@ php artisan enum:annotate --force
 php artisan enum:annotate -f
 ```
 
+#### 🏗️ make
+
+The `enum:make` command creates a new - automatically annotated - enum with the cases that we provide:
+
+```bash
+php artisan enum:make
+```
+
+If we don't provide any argument, prompts appear to let us define the enum namespace, backing type and cases. Otherwise we can define all of them via command line:
+
+```bash
+php artisan enum:make App/Enums/Enum CaseOne CaseTwo
+
+php artisan enum:make "App\Enums\Enum" CaseOne CaseTwo
+```
+
+If we need to create backed enums, we can specify a custom value for each case:
+
+```bash
+php artisan enum:make App/Enums/Enum CaseOne=value1 CaseTwo=value2
+```
+
+Otherwise we can automatically assign values to cases by setting the `--backed` option:
+
+```bash
+php artisan enum:make App/Enums/Enum CaseOne CaseTwo --backed=int0
+```
+
+The option `--backed` supports the following values:
+
+- `int0`: assign an incremental integer starting from 0 (0, 1, 2...)
+- `int1`: assign an incremental integer starting from 1 (1, 2, 3...)
+- `bitwise`: assign an incremental bitwise value (1, 2, 4...)
+- `snake`: assign the case name in snake case (case_one, case_two...)
+- `kebab`: assign the case name in kebab case (case-one, case-two...)
+- `camel`: assign the case name in camel case (caseOne, caseTwo...)
+- `lower`: assign the case name in lower case (caseone, casetwo...)
+- `upper`: assign the case name in upper case (CASEONE, CASETWO...)
+
+If we want to overwrite an existing enum, we can add the option `--force`:
+
+```bash
+php artisan enum:make App/Enums/Enum CaseOne CaseTwo --force
+
+php artisan enum:make App/Enums/Enum CaseOne CaseTwo -f
+```
+
+We can generate the TypeScript counterpart of the newly created enum by adding the `--typescript` option:
+
+```bash
+php artisan enum:make App/Enums/Enum CaseOne CaseTwo --typescript
+
+php artisan enum:make App/Enums/Enum CaseOne CaseTwo -t
+```
+
+#### 💙 ts
+
+The `ts` command turns enums into their TypeScript counterpart, synchronizing backend with frontend:
+
+```bash
+php artisan enum:ts
+```
+
+If we don't provide any argument, a prompt appears to select all the enums that we want to synchronize. By default enums get searched in the `app/Enums` directory. If we need to scan other folders, we can define them by calling `Enums::setPaths()`:
+
+```php
+use Cerbero\LaravelEnum\Enums;
+
+class AppServiceProvider extends ServiceProvider
+{
+    public function boot(): void
+    {
+        Enums::setPaths('app/Enums', 'domain/*/Enums');
+    }
+}
+```
+
+In the above example, enums are searched in the `app/Enums` directory and in all `Enums` sub-folders belonging to `domain`, e.g. `domain/Posts/Enums`, `domain/Users/Enums`, etc.
+
+To synchronize all the enums in the directories defined in `Enums::setPaths()`, we can simply add the `--all` option:
+
+```bash
+php artisan enum:ts --all
+
+php artisan enum:ts -a
+```
+
+Alternatively we can provide one or more enums to the `enum:ts` command. Both slashes and quoted backslashes are allowed to specify the enum namespaces:
+
+```bash
+php artisan enum:ts App/Enums/Permissions "App\Enums\PayoutStatuses"
+```
+
+By default enums are synchronized in `resources/js/enums/index.ts`, however we can customize it in our `enums.php` configuration file:
+
+```php
+use Cerbero\LaravelEnum\Enums;
+
+class AppServiceProvider extends ServiceProvider
+{
+    public function boot(): void
+    {
+        // custom static path
+        Enums::setTypeScript('frontend/enums/index.ts');
+
+        // custom dynamic path
+        Enums::setTypeScript(function (string $enum) {
+            $domain = explode('\\', $enum)[1];
+
+            return "resources/js/modules/{$domain}/enums.ts";
+        });
+    }
+}
+```
+
+As seen above, we can either set a static path for our TypeScript enums or dynamically set the TypeScript path of an enum depending on its namespace.
+
+Finally if we want to update previously synchronized enums, we can add the option `--force`:
+
+```bash
+php artisan enum:ts App/Enums/Enum --force
+
+php artisan enum:ts App/Enums/Enum -f
+```
+
 
 ## 📆 Change log
 
@@ -514,11 +647,11 @@ If you discover any security related issues, please email andrea.marco.sartori@g
 The MIT License (MIT). Please see [License File](LICENSE.md) for more information.
 
 [ico-author]: https://img.shields.io/badge/author-cerbero90-blue?logo=x&style=flat-square&logoSize=auto
-[ico-php]: https://img.shields.io/packagist/php-v/cerbero/laravel-enum?color=%234F5B93&logo=php&style=flat-square&logoSize=auto
+[ico-php]: https://img.shields.io/packagist/php-v/cerbero/laravel-enum?color=%23767bb5&logo=php&style=flat-square&logoSize=auto
 [ico-laravel]: https://img.shields.io/static/v1?label=laravel&message=%E2%89%A59.0&color=ff2d20&logo=laravel&style=flat-square&logoSize=auto
 [ico-version]: https://img.shields.io/packagist/v/cerbero/laravel-enum.svg?label=version&style=flat-square
 [ico-actions]: https://img.shields.io/github/actions/workflow/status/cerbero90/laravel-enum/build.yml?branch=master&style=flat-square&logo=github&logoSize=auto
-[ico-license]: https://img.shields.io/badge/license-MIT-brightgreen.svg?style=flat-square
+[ico-license]: https://img.shields.io/badge/license-MIT-blue.svg?style=flat-square
 [ico-per]: https://img.shields.io/static/v1?label=compliance&message=PER&color=blue&style=flat-square
 [ico-scrutinizer]: https://img.shields.io/scrutinizer/coverage/g/cerbero90/laravel-enum.svg?style=flat-square&logo=scrutinizer&logoSize=auto
 [ico-code-quality]: https://img.shields.io/scrutinizer/g/cerbero90/laravel-enum.svg?style=flat-square&logo=scrutinizer&logoSize=auto
