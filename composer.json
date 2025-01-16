@@ -20,7 +20,8 @@
         "cerbero/enum": "^2.3.1",
         "illuminate/console": ">=9.0",
         "illuminate/contracts": ">=9.0",
-        "illuminate/support": ">=9.0"
+        "illuminate/support": ">=9.0",
+        "laravel/prompts": "^0.3.3"
     },
     "require-dev": {
         "orchestra/testbench": ">=7.0",
