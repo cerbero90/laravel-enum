@@ -4,36 +4,10 @@ declare(strict_types=1);
 
 namespace Cerbero\LaravelEnum;
 
-use Generator;
+use UnitEnum;
 
 /**
- * Determine whether the given namespace exists.
- */
-function namespaceExists(string $target): bool
-{
-    return class_exists($target) || interface_exists($target);
-}
-
-/**
- * Yield the content of the given path line by line.
- *
- * @return Generator<int, string>
- */
-function yieldLines(string $path): Generator
-{
-    $stream = fopen($path, 'rb');
-
-    try {
-        while (($line = fgets($stream, 1024)) !== false) {
-            yield $line;
-        }
-    } finally {
-        is_resource($stream) && fclose($stream);
-    }
-}
-
-/**
- * Retrieve the common type among the given types.
+ * Retrieve the type in common with the given types.
  */
 function commonType(string ...$types): string
 {
@@ -72,4 +46,28 @@ function commonInterfaceOrParent(string ...$classes): ?string
     }
 
     return null;
+}
+
+/**
+ * Determine whether the given namespace exists.
+ */
+function namespaceExists(string $namespace): bool
+{
+    return class_exists($namespace) || interface_exists($namespace);
+}
+
+/**
+ * Retrieve the return type of the given meta for the provided cases.
+ *
+ * @param list<UnitEnum> $cases
+ */
+function metaReturnType(string $meta, array $cases): string
+{
+    $returnTypes = array_map(function (UnitEnum $case) use ($meta) {
+        $value = $case->resolveMetaAttribute($meta);
+
+        return is_string($value) && namespaceExists($value) ? $value : get_debug_type($value);
+    }, $cases);
+
+    return commonType(...$returnTypes);
 }
