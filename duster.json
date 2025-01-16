@@ -7,7 +7,7 @@
     ],
     "scripts": {
         "lint": {
-            "phpstan": ["./vendor/bin/phpstan", "analyse"]
+            "phpstan": ["./vendor/bin/phpstan", "analyse", "--memory-limit=-1"]
         }
     }
 }
