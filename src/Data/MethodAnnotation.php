@@ -5,17 +5,15 @@ declare(strict_types=1);
 namespace Cerbero\LaravelEnum\Data;
 
 use BackedEnum;
-use Cerbero\LaravelEnum\Services\CacheKey;
+use Cerbero\Enum\Data\MethodAnnotation as BaseMethodAnnotation;
 use ReflectionMethod;
-use Stringable;
-use UnitEnum;
 
 use function Cerbero\LaravelEnum\namespaceExists;
 
 /**
  * The method annotation.
  */
-final class MethodAnnotation implements Stringable
+final class MethodAnnotation extends BaseMethodAnnotation
 {
     /**
      * The regular expression to extract the explicit arguments.
@@ -28,30 +26,18 @@ final class MethodAnnotation implements Stringable
     public const RE_PLACEHOLDER = '~:([a-zA-Z0-9_]+)~';
 
     /**
-     * Whether the method is static.
+     * Retrieve the method annotation for the given case and capsule.
+     *
+     * @param class-string $capsule
      */
-    public readonly bool $isStatic;
-
-    /**
-     * Retrieve the method annotation for the given case.
-     */
-    public static function forCase(UnitEnum $case): self
-    {
-        $returnType = is_int($case->value ?? null) ? 'int' : 'string';
-
-        return new self($case->name, "static {$returnType} {$case->name}()");
-    }
-
-    /**
-     * Retrieve the method annotation for the given cache case.
-     */
-    public static function forCacheCase(BackedEnum $case): self
+    public static function forCapsule(BackedEnum $case, string $capsule): static
     {
         preg_match_all(self::RE_ARGUMENTS, (string) $case->value, $matches);
 
+        $capsuleName = class_basename($capsule);
         $arguments = implode(', ', array_map('trim', $matches[1]));
 
-        return new self($case->name, "static CacheKey {$case->name}({$arguments})", [CacheKey::class]);
+        return new self($case->name, "static {$capsuleName} {$case->name}({$arguments})", [$capsule]);
     }
 
     /**
@@ -59,12 +45,13 @@ final class MethodAnnotation implements Stringable
      *
      * @param class-string $class
      */
-    public static function forInvokable(string $name, string $class): self
+    public static function forInvokable(string $name, string $class): static
     {
         $parameters = $namespaces = [];
         $reflection = new ReflectionMethod($class, '__invoke');
+        $returnType = (string) $reflection->getReturnType() ?: 'mixed';
 
-        if (namespaceExists($returnType = (string) $reflection->getReturnType() ?: 'mixed')) {
+        if (namespaceExists($returnType)) {
             /** @var class-string $returnType */
             $namespaces[] = $returnType;
 
@@ -72,7 +59,9 @@ final class MethodAnnotation implements Stringable
         }
 
         foreach ($reflection->getParameters() as $parameter) {
-            if (namespaceExists($type = (string) $parameter->getType() ?: 'mixed')) {
+            $type = (string) $parameter->getType() ?: 'mixed';
+
+            if (namespaceExists($type)) {
                 /** @var class-string $type */
                 $namespaces[] = $type;
 
@@ -88,7 +77,7 @@ final class MethodAnnotation implements Stringable
     /**
      * Retrieve the method annotation for an instance method.
      */
-    public static function instance(string $name, string $returnType): self
+    public static function instance(string $name, string $returnType): static
     {
         $namespaces = [];
         $null = str_starts_with($returnType, '?') ? '?' : '';
@@ -107,33 +96,12 @@ final class MethodAnnotation implements Stringable
     /**
      * Retrieve the method annotation for the given translation.
      */
-    public static function forTranslation(string $name, string $translation): self
+    public static function forTranslation(string $name, string $translation): static
     {
         preg_match_all(self::RE_PLACEHOLDER, $translation, $matches);
 
         $parameters = array_map(fn(string $name) => "mixed \${$name}", $matches[1]);
 
         return new self($name, sprintf('string %s(%s)', $name, implode(', ', $parameters)));
-    }
-
-    /**
-     * Instantiate the class.
-     *
-     * @param list<class-string> $namespaces
-     */
-    public function __construct(
-        public readonly string $name,
-        public readonly string $annotation,
-        public readonly array $namespaces = [],
-    ) {
-        $this->isStatic = str_starts_with($annotation, 'static');
-    }
-
-    /**
-     * Retrieve the method annotation string.
-     */
-    public function __toString(): string
-    {
-        return "@method {$this->annotation}";
     }
 }

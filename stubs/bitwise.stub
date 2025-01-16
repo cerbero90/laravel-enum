@@ -1,0 +1,15 @@
+<?php
+
+declare(strict_types=1);
+
+namespace {{ namespace }};
+
+use Cerbero\LaravelEnum\Concerns\Enumerates;
+use Cerbero\LaravelEnum\Contracts\Bitwise;
+
+enum {{ name }}: int implements Bitwise
+{
+    use Enumerates;
+
+{{ cases }}
+}

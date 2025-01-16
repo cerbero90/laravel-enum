@@ -21,17 +21,16 @@ class OnCall
     /**
      * Handle the call to an inaccessible case method.
      *
-     * @param UnitEnum $case
      * @param array<array-key, mixed> $arguments
      * @throws InvalidArgumentException
      * @throws \ValueError
      */
-    public function __invoke(object $case, string $name, array $arguments): mixed
+    public function __invoke(UnitEnum $case, string $name, array $arguments): mixed
     {
         try {
             $value = $case->resolveMetaAttribute($name);
         } catch (Throwable $e) {
-            return $this->translate($case, $name, $arguments) ?: throw $e;
+            return $this->translate($case, $name, $arguments) ?? throw $e;
         }
 
         return match (true) {
@@ -52,7 +51,7 @@ class OnCall
     {
         $key = Enums::resolveTranslationKey($case, $name);
 
-        if ($key === Lang::get($key)) {
+        if (Lang::get($key) === $key) {
             return null;
         }
 

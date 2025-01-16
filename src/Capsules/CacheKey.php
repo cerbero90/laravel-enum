@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Cerbero\LaravelEnum\Services;
+namespace Cerbero\LaravelEnum\Capsules;
 
 use Closure;
 use DateInterval;

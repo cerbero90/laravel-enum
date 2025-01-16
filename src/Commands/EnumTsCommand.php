@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace Cerbero\LaravelEnum\Commands;
 
 use Cerbero\LaravelEnum\Enums;
-use Cerbero\LaravelEnum\Services\Annotator;
+use Cerbero\LaravelEnum\Services\TypeScript;
 use Illuminate\Console\Command;
 
 use function Cerbero\Enum\normalizeEnums;
@@ -13,26 +13,26 @@ use function Cerbero\LaravelEnum\output;
 use function Laravel\Prompts\multiselect;
 
 /**
- * The console command to annotate enums.
+ * The console command to synchronize enums in TypeScript.
  */
-final class EnumAnnotateCommand extends Command
+final class EnumTsCommand extends Command
 {
     /**
      * The console command description.
      *
      * @var string
      */
-    protected $description = 'Annotate enums to ease IDE autocompletion';
+    protected $description = 'Synchronize enums in TypeScript';
 
     /**
      * The name and signature of the console command.
      *
      * @var string
      */
-    protected $signature = 'enum:annotate
-                            {enums?* : The enums to annotate}
-                            {--a|all : Whether all enums should be annotated}
-                            {--f|force : Whether existing annotations should be overwritten}';
+    protected $signature = 'enum:ts
+                            {enums?* : The enums to synchronize}
+                            {--a|all : Whether all enums should be synchronized}
+                            {--f|force : Whether existing enums should be overwritten}';
 
     /**
      * Handle the command.
@@ -49,7 +49,7 @@ final class EnumAnnotateCommand extends Command
         $force = !! $this->option('force');
 
         foreach($enums as $enum) {
-            $succeeded = output($this->output, $enum, fn() => (new Annotator($enum))->annotate($force)) && $succeeded;
+            $succeeded = output($this->output, $enum, fn() => (new TypeScript($enum))->sync($force)) && $succeeded;
         }
 
         return $succeeded ? self::SUCCESS : self::FAILURE;
@@ -67,7 +67,7 @@ final class EnumAnnotateCommand extends Command
             ! empty($enums = (array) $this->argument('enums')) => normalizeEnums($enums),
             empty($enums = [...Enums::namespaces()]) => [],
             $this->option('all') => $enums,
-            default => multiselect('Enums to annotate:', $enums, required: true, hint: 'Press space to select.'),
+            default => multiselect('Enums to synchronize:', $enums, required: true, hint: 'Press space to select.'),
         };
     }
 }

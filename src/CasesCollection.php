@@ -16,10 +16,10 @@ use Illuminate\Support\Traits\Tappable;
 /**
  * The collection of enum cases.
  *
- * @template TValue
+ * @template-covariant TEnum of \UnitEnum
  *
- * @extends BaseCasesCollection<TValue>
- * @implements Arrayable<array-key, TValue>
+ * @extends BaseCasesCollection<TEnum>
+ * @implements Arrayable<array-key, TEnum>
  */
 class CasesCollection extends BaseCasesCollection implements Arrayable, Castable, Jsonable
 {
@@ -31,18 +31,18 @@ class CasesCollection extends BaseCasesCollection implements Arrayable, Castable
      * Retrieve the caster to cast the collection.
      *
      * @param list<string> $arguments
-     * @return CasesCollectionCast<TValue>
+     * @return CasesCollectionCast<TEnum>
      */
     public static function castUsing(array $arguments): CastsAttributes
     {
-        /** @var CasesCollectionCast<TValue> */
+        /** @var CasesCollectionCast<TEnum> */
         return new CasesCollectionCast($arguments[0] ?? '');
     }
 
     /**
      * Retrieve the cast for the given enum.
      *
-     * @param class-string<\UnitEnum> $enum
+     * @param class-string<TEnum> $enum
      */
     public static function of(string $enum): string
     {

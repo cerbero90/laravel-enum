@@ -4,57 +4,33 @@ declare(strict_types=1);
 
 namespace Cerbero\LaravelEnum\Services;
 
-use ArrayIterator;
+use Cerbero\Enum\Services\MethodAnnotations as BaseMethodAnnotations;
 use Cerbero\LaravelEnum\Data\MethodAnnotation;
 use Cerbero\LaravelEnum\Enums;
 use Illuminate\Support\Facades\Lang;
-use IteratorAggregate;
-use Traversable;
 
-use function Cerbero\LaravelEnum\commonType;
-use function Cerbero\LaravelEnum\namespaceExists;
+use function Cerbero\LaravelEnum\metaReturnType;
 
 /**
  * The method annotations collector.
  *
- * @implements IteratorAggregate<string, MethodAnnotation>
+ * @property-read Inspector $inspector
  */
-final class MethodAnnotations implements IteratorAggregate
+final class MethodAnnotations extends BaseMethodAnnotations
 {
     /**
-     * The regular expression to extract method annotations already annotated on the enum.
-     */
-    public const RE_METHOD = '~@method\s+((?:static)?\s*[^\s]+\s+([^\(]+).*)~';
-
-    /**
-     * Instantiate the class.
+     * Retrieve all the method annotations.
      *
-     * @param Inspector<\UnitEnum> $inspector
+     * @return array<string, MethodAnnotation>
      */
-    public function __construct(
-        private readonly Inspector $inspector,
-        private readonly bool $force,
-    ) {}
-
-    /**
-     * Retrieve the method annotations.
-     *
-     * @return ArrayIterator<string, MethodAnnotation>
-     */
-    public function getIterator(): Traversable
+    public function all(): array
     {
-        $annotations = [
+        return [
             ...$this->forCaseNames(),
             ...$this->forMetaAttributes(),
             ...$this->forTranslations(),
-            ...$this->force ? [] : $this->existing(),
+            ...$this->includeExisting ? $this->existing() : [],
         ];
-
-        uasort($annotations, function (MethodAnnotation $a, MethodAnnotation $b) {
-            return [$b->isStatic, $a->name] <=> [$a->isStatic, $b->name];
-        });
-
-        return new ArrayIterator($annotations);
     }
 
     /**
@@ -65,13 +41,11 @@ final class MethodAnnotations implements IteratorAggregate
     public function forCaseNames(): array
     {
         $annotations = [];
-        $method = $this->inspector->enumeratesCacheKeys() ? 'forCacheCase' : 'forCase';
 
         foreach ($this->inspector->cases() as $case) {
-            $annotations[$case->name] = MethodAnnotation::$method($case);
+            $annotations[$case->name] = $this->inspector->caseAnnotation($case);
         }
 
-        /** @var array<string, MethodAnnotation> */
         return $annotations;
     }
 
@@ -83,20 +57,15 @@ final class MethodAnnotations implements IteratorAggregate
     public function forMetaAttributes(): array
     {
         $annotations = [];
+        $cases = $this->inspector->cases();
 
-        foreach ($this->inspector->metaAttributeNames() as $name) {
-            $returnTypes = array_map(function (mixed $case) use ($name) {
-                $value = $case->resolveMetaAttribute($name);
-
-                return is_string($value) && namespaceExists($value) ? $value : get_debug_type($value);
-            }, $this->inspector->cases());
-
-            $returnType = commonType(...$returnTypes);
+        foreach ($this->inspector->metaAttributeNames() as $meta) {
+            $returnType = metaReturnType($meta, $cases);
 
             /** @var class-string $class */
-            $annotations[$name] = method_exists($class = ltrim($returnType, '?'), '__invoke')
-                ? MethodAnnotation::forInvokable($name, $class)
-                : MethodAnnotation::instance($name, $returnType);
+            $annotations[$meta] = method_exists($class = ltrim($returnType, '?'), '__invoke')
+                ? MethodAnnotation::forInvokable($meta, $class)
+                : MethodAnnotation::instance($meta, $returnType);
         }
 
         return $annotations;
@@ -122,24 +91,6 @@ final class MethodAnnotations implements IteratorAggregate
             foreach ($translations as $name => $translation) {
                 $annotations[$name] ??= MethodAnnotation::forTranslation($name, $translation);
             }
-        }
-
-        return $annotations;
-    }
-
-    /**
-     * Retrieve the method annotations already annotated on the enum.
-     *
-     * @return array<string, MethodAnnotation>
-     */
-    public function existing(): array
-    {
-        $annotations = [];
-
-        preg_match_all(self::RE_METHOD, $this->inspector->docBlock(), $matches, PREG_SET_ORDER);
-
-        foreach ($matches as $match) {
-            $annotations[$match[2]] = new MethodAnnotation($match[2], $match[1]);
         }
 
         return $annotations;

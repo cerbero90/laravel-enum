@@ -15,7 +15,7 @@ trait CollectsCases
     /**
      * Retrieve a collection with all the cases.
      *
-     * @return CasesCollection<array-key, static>
+     * @return CasesCollection<static>
      */
     public static function collect(): CasesCollection
     {

@@ -4,136 +4,58 @@ declare(strict_types=1);
 
 namespace Cerbero\LaravelEnum\Services;
 
-use Cerbero\LaravelEnum\Concerns\EnumeratesCacheKeys;
+use Cerbero\Enum\Services\Inspector as BaseInspector;
+use Cerbero\LaravelEnum\Capsules;
+use Cerbero\LaravelEnum\Concerns;
 use Cerbero\LaravelEnum\Data\MethodAnnotation;
-use ReflectionEnum;
+use UnitEnum;
 
 /**
  * The enum inspector.
  *
- * @template TEnum
+ * @template TEnum of UnitEnum
+ *
+ * @extends BaseInspector<TEnum>
  */
-final class Inspector
+final class Inspector extends BaseInspector
 {
     /**
-     * The enum reflection.
+     * The main trait to supercharge enums.
      *
-     * @var ReflectionEnum<\UnitEnum>
+     * @var class-string
      */
-    private readonly ReflectionEnum $reflection;
+    protected string $mainTrait = Concerns\Enumerates::class;
 
     /**
-     * The method annotations.
+     * The capsules keyed by the related trait.
      *
-     * @var array<string, MethodAnnotation>
+     * @var array<class-string, class-string>
      */
-    private array $methodAnnotations;
-
-    /**
-     * The use statements.
-     *
-     * @var array<string, class-string>
-     */
-    private array $useStatements;
-
-    /**
-     * Instantiate the class.
-     *
-     * @param class-string<TEnum> $enum
-     */
-    public function __construct(
-        private readonly string $enum,
-        private readonly bool $force,
-    ) {
-        /** @var class-string<\UnitEnum> $enum */
-        $this->reflection = new ReflectionEnum($enum);
-    }
-
-    /**
-     * Retrieve the enum filename.
-     */
-    public function filename(): string
-    {
-        return (string) $this->reflection->getFileName();
-    }
-
-    /**
-     * Retrieve the enum namespace.
-     */
-    public function namespace(): string
-    {
-        return $this->reflection->getNamespaceName();
-    }
+    private array $capsules = [
+        Concerns\EnumeratesCacheKeys::class => Capsules\CacheKey::class,
+        Concerns\EnumeratesSessionKeys::class => Capsules\SessionKey::class,
+    ];
 
     /**
      * Determine whether the given namespace matches the enum namespace.
      */
     public function hasSameNamespace(string $namespace): bool
     {
-        return $namespace == $this->namespace() . '\\' . class_basename($namespace);
+        return $this->reflection->getNamespaceName() . '\\' . class_basename($namespace) == $namespace;
     }
 
     /**
-     * Retrieve the DocBlock of the enum.
+     * Retrieve the method annotation for the given case.
      */
-    public function docBlock(): string
+    public function caseAnnotation(UnitEnum $case): MethodAnnotation
     {
-        return $this->reflection->getDocComment() ?: '';
-    }
-
-    /**
-     * Retrieve the enum cases.
-     *
-     * @return list<TEnum>
-     */
-    public function cases(): array
-    {
-        /** @var list<TEnum> */
-        return $this->enum::cases();
-    }
-
-    /**
-     * Retrieve the meta attribute names of the enum.
-     *
-     * @return list<string>
-     */
-    public function metaAttributeNames(): array
-    {
-        /** @var list<string> */
-        return $this->enum::metaAttributeNames();
-    }
-
-    /**
-     * Determine whether the enum enumerates cache keys.
-     */
-    public function enumeratesCacheKeys(): bool
-    {
-        return $this->uses(EnumeratesCacheKeys::class);
-    }
-
-    /**
-     * Determine whether the enum uses the given trait.
-     */
-    public function uses(string $trait): bool
-    {
-        return isset($this->traits()[$trait]);
-    }
-
-    /**
-     * Retrieve all the enum traits.
-     *
-     * @return array<class-string, class-string>
-     */
-    public function traits(): array
-    {
-        $traits = [];
-
-        foreach ($this->reflection->getTraitNames() as $trait) {
-            $traits += [$trait => $trait, ...trait_uses_recursive($trait)];
+        foreach ($this->capsules as $trait => $capsule) {
+            if ($this->uses($trait)) {
+                return MethodAnnotation::forCapsule($case, $capsule);
+            }
         }
 
-        /** @var array<class-string, class-string> */
-        return $traits;
+        return MethodAnnotation::forCase($case);
     }
 
     /**
@@ -141,9 +63,9 @@ final class Inspector
      *
      * @return array<string, class-string>
      */
-    public function useStatements(): array
+    public function useStatements(bool $includeExisting = true): array
     {
-        return $this->useStatements ??= [...new UseStatements($this)];
+        return $this->useStatements ??= [...new UseStatements($this, $includeExisting)];
     }
 
     /**
@@ -151,8 +73,8 @@ final class Inspector
      *
      * @return array<string, MethodAnnotation>
      */
-    public function methodAnnotations(): array
+    public function methodAnnotations(bool $includeExisting = true): array
     {
-        return $this->methodAnnotations ??= [...new MethodAnnotations($this, $this->force)];
+        return $this->methodAnnotations ??= [...new MethodAnnotations($this, $includeExisting)];
     }
 }
