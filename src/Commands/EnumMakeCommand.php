@@ -60,16 +60,7 @@ final class EnumMakeCommand extends Command
             return self::FAILURE;
         }
 
-        $generator = new Generator($enum, $this->cases($backed), $backed);
-        $typeScript = !! $this->option('typescript');
-
-        $succeeded = output($this->output, $enum, function () use ($generator, $enum, $force, $typeScript) {
-            return $generator->generate($force)
-                && runAnnotate($enum, $force)
-                && ($typeScript ? runTs($enum, $force) : true);
-        });
-
-        return $succeeded ? self::SUCCESS : self::FAILURE;
+        return $this->generate($enum, $backed);
     }
 
     /**
@@ -109,6 +100,26 @@ final class EnumMakeCommand extends Command
 
         /** @var string $name */
         return Backed::tryFrom($name);
+    }
+
+    /**
+     * Generate the enum.
+     *
+     * @param class-string<\UnitEnum> $enum
+     */
+    private function generate(string $enum, Backed $backed): int
+    {
+        $generator = new Generator($enum, $this->cases($backed), $backed);
+        $force = !! $this->option('force');
+        $typeScript = !! $this->option('typescript');
+
+        $succeeded = output($this->output, $enum, function () use ($generator, $enum, $force, $typeScript) {
+            return $generator->generate($force)
+                && runAnnotate($enum, $force)
+                && ($typeScript ? runTs($enum, $force) : true);
+        });
+
+        return $succeeded ? self::SUCCESS : self::FAILURE;
     }
 
     /**
