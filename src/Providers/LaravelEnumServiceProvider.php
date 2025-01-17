@@ -1,27 +1,43 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Cerbero\LaravelEnum\Providers;
 
+use Cerbero\LaravelEnum\Commands;
+use Cerbero\LaravelEnum\Enums;
+use Illuminate\Console\Command;
 use Illuminate\Support\ServiceProvider;
-use Cerbero\LaravelEnum\Console\Commands\EnumMakeCommand;
 
 /**
- * The Laravel Enum service provider.
- *
+ * The package service provider.
  */
-class LaravelEnumServiceProvider extends ServiceProvider
+final class LaravelEnumServiceProvider extends ServiceProvider
 {
     /**
-     * Bootstrap the application services.
+     * The console commands to register.
      *
-     * @return void
+     * @var list<class-string<Command>>
      */
-    public function boot()
+    private array $commands = [
+        Commands\EnumAnnotateCommand::class,
+        Commands\EnumMakeCommand::class,
+        Commands\EnumTsCommand::class,
+    ];
+
+    /**
+     * Bootstrap the package services.
+     */
+    public function boot(): void
     {
+        Enums::setBasePath($this->app->basePath());
+
         if ($this->app->runningInConsole()) {
-            $this->commands([
-                EnumMakeCommand::class,
-            ]);
+            $this->commands($this->commands);
         }
+
+        $this->publishes([
+            __DIR__ . '/../../stubs' => $this->app->basePath('stubs/laravel-enum'),
+        ], 'laravel-enum-stubs');
     }
 }
