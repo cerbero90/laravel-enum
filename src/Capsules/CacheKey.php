@@ -73,6 +73,7 @@ final class CacheKey
      */
     public function set(mixed $value, DateTimeInterface|DateInterval|int|null $ttl = null): bool
     {
+        /** @phpstan-ignore argument.type */
         return Cache::set($this->key, $value, $ttl);
     }
 
