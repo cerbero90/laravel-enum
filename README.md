@@ -32,7 +32,7 @@ composer require cerbero/laravel-enum
 * [🧺 Cases collection](#-cases-collection)
 * [🪄 Magic translation](#-magic-translation)
 * [💊 Encapsulation](#-encapsulation)
-* [🦾 Artisan commands](#%EF%B8%8F-enumannotate)
+* [🦾 Artisan commands](#-artisan-commands)
   * [🗒️ enum:annotate](#%EF%B8%8F-enumannotate)
   * [🏗️ enum:make](#%EF%B8%8F-enummake)
   * [💙 enum:ts](#-enumts)
@@ -350,7 +350,7 @@ The benefits of this approach are many:
 - reviewing/managing all our application keys in a central location
 - updating keys in one file only instead of replacing all their occurrences
 
-To encapsulate the Laravel session, we can create an enum holding all our session keys and let it use `EnumeratesSessionKeys`. The enum can be either pure or backed:
+To encapsulate the Laravel session, we can create a backed enum holding all our session keys and let it use the `EnumeratesSessionKeys` trait:
 
 ```php
 use Cerbero\LaravelEnum\Concerns\EnumeratesSessionKeys;
@@ -359,13 +359,13 @@ enum SessionKeys
 {
     use EnumeratesSessionKeys;
 
-    case CartItems;
-    case LoginTime;
-    case OnboardingStep;
+    case CartItems = 'cart-items';
+    case OnboardingStep = 'onboarding-step';
+    case FormsData = 'forms.{int $formId}.data';
 }
 ```
 
-The `EnumeratesSessionKeys` trait also uses `Enumerates`, hence all the features of this package. We can now call all the Laravel session methods after instantiating our cases:
+The `EnumeratesSessionKeys` trait also uses `Enumerates`, hence all the features of this package. We can now leverage all the Laravel session methods after statically calling our enum cases:
 
 ```php
 SessionKeys::CartItems()->exists();
@@ -386,7 +386,13 @@ SessionKeys::CartItems()->remove();
 SessionKeys::CartItems()->forget();
 ```
 
-To encapsulate the Laravel cache, we can create a string backed enum holding all our cache keys and let it use `EnumeratesCacheKeys`:
+When statically calling our cases, we can pass parameters to resolve dynamic keys. Such parameters replace the `{...}` placeholders in the session keys:
+
+```php
+SessionKeys::FormsData($formId)->exists();
+```
+
+To encapsulate the Laravel cache, we can create a backed enum holding all our cache keys and let it use the `EnumeratesCacheKeys` trait:
 
 ```php
 use Cerbero\LaravelEnum\Concerns\EnumeratesCacheKeys;
@@ -401,33 +407,32 @@ enum CacheKeys: string
 }
 ```
 
-The `EnumeratesCacheKeys` trait also uses `Enumerates`, hence all the features of this package. We can now call all the Laravel cache methods after instantiating our cases:
+The `EnumeratesCacheKeys` trait also uses `Enumerates`, hence all the features of this package. We can now leverage all the Laravel cache methods after statically calling our enum cases:
 
 ```php
-$teamMemberPosts = CacheKeys::TeamMemberPosts($teamId, $userId);
-
-$teamMemberPosts->exists();
-$teamMemberPosts->missing();
-$teamMemberPosts->hasValue();
-$teamMemberPosts->get($default);
-$teamMemberPosts->pull($default);
-$teamMemberPosts->put($value, $ttl);
-$teamMemberPosts->add($value, $ttl);
-$teamMemberPosts->increment($value);
-$teamMemberPosts->decrement($value);
-$teamMemberPosts->forever($value);
-$teamMemberPosts->remember($ttl, $callback);
-$teamMemberPosts->rememberForever($callback);
-$teamMemberPosts->forget();
+CacheKeys::Tags()->exists();
+CacheKeys::Tags()->missing();
+CacheKeys::Tags()->hasValue();
+CacheKeys::Tags()->get($default);
+CacheKeys::Tags()->pull($default);
+CacheKeys::Tags()->put($value, $ttl);
+CacheKeys::Tags()->set($value, $ttl);
+CacheKeys::Tags()->add($value, $ttl);
+CacheKeys::Tags()->increment($value);
+CacheKeys::Tags()->decrement($value);
+CacheKeys::Tags()->forever($value);
+CacheKeys::Tags()->remember($ttl, $callback);
+CacheKeys::Tags()->rememberForever($callback);
+CacheKeys::Tags()->sear($callback);
+CacheKeys::Tags()->forget();
+CacheKeys::Tags()->delete();
+CacheKeys::Tags()->lock($seconds, $owner);
+CacheKeys::Tags()->restoreLock($owner);
 ```
 
-We can instantiate our cases statically and pass parameters to resolve dynamic keys. Such parameters replace the `{...}` placeholders in the cache keys:
+When statically calling our cases, we can pass parameters to resolve dynamic keys. Such parameters replace the `{...}` placeholders in the cache keys:
 
 ```php
-CacheKeys::PostComments($postId)->exists();
-
-CacheKeys::Tags()->exists();
-
 CacheKeys::TeamMemberPosts($teamId, $userId)->exists();
 ```
 
@@ -439,23 +444,23 @@ CacheKeys::TeamMemberPosts($teamId, $userId)->exists();
 
 A handy set of Artisan commands is provided out of the box to interact with enums seamlessly.
 
-Some commands generate enums or related files. If we want to customize the generated files, we can publish the stubs:
+Some commands generate enums or related files. If we want to customize such files, we can publish the stubs:
 
 ```bash
 php artisan vendor:publish --tag=laravel-enum-stubs
 ```
 
-The stubs can be modified in the `stubs/laravel-enum` directory, in the root of our application.
+The stubs can then be modified in the `stubs/laravel-enum` directory, in the root of our application.
 
 #### 🗒️ enum:annotate
 
-IDEs can autocomplete static case methods, meta methods, translations, etc. by running the `enum:annotate` command:
+IDEs can autocomplete case methods, meta methods, translations, etc. by running the `enum:annotate` command:
 
 ```bash
 php artisan enum:annotate
 ```
 
-If we don't provide any argument, a prompt appears to select all the enums that we want to annotate. By default enums get searched in the `app/Enums` directory. If we need to scan other folders, we can define them by calling `Enums::setPaths()`:
+If we don't provide any argument, a prompt appears to select all the enums that we want to annotate. By default enums get searched in the `app/Enums` directory. If need be, we can scan other folders:
 
 ```php
 use Cerbero\LaravelEnum\Enums;
@@ -493,7 +498,7 @@ php artisan enum:annotate --force
 php artisan enum:annotate -f
 ```
 
-#### 🏗️ make
+#### 🏗️ enum:make
 
 The `enum:make` command creates a new - automatically annotated - enum with the cases that we provide:
 
@@ -501,7 +506,7 @@ The `enum:make` command creates a new - automatically annotated - enum with the 
 php artisan enum:make
 ```
 
-If we don't provide any argument, prompts appear to let us define the enum namespace, backing type and cases. Otherwise we can define all of them via command line:
+If we don't provide any argument, prompts appear to let us define the enum namespace, backing type and cases. Otherwise we can specify all of them via command line:
 
 ```bash
 php artisan enum:make App/Enums/Enum CaseOne CaseTwo
@@ -548,7 +553,7 @@ php artisan enum:make App/Enums/Enum CaseOne CaseTwo --typescript
 php artisan enum:make App/Enums/Enum CaseOne CaseTwo -t
 ```
 
-#### 💙 ts
+#### 💙 enum:ts
 
 The `ts` command turns enums into their TypeScript counterpart, synchronizing backend with frontend:
 
