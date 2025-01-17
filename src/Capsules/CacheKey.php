@@ -7,6 +7,7 @@ namespace Cerbero\LaravelEnum\Capsules;
 use Closure;
 use DateInterval;
 use DateTimeInterface;
+use Illuminate\Contracts\Cache\Lock;
 use Illuminate\Support\Facades\Cache;
 
 /**
@@ -68,6 +69,14 @@ final class CacheKey
     }
 
     /**
+     * Store the value of the key in the cache.
+     */
+    public function set(mixed $value, DateTimeInterface|DateInterval|int|null $ttl = null): bool
+    {
+        return Cache::set($this->key, $value, $ttl);
+    }
+
+    /**
      * Store the value of the key in the cache if the key does not exist.
      */
     public function add(mixed $value, DateTimeInterface|DateInterval|int|null $ttl = null): bool
@@ -118,10 +127,42 @@ final class CacheKey
     }
 
     /**
+     * Retrieve or store indefinitely the value of the key.
+     */
+    public function sear(Closure $callback): mixed
+    {
+        return Cache::sear($this->key, $callback);
+    }
+
+    /**
      * Remove the key from the cache.
      */
     public function forget(): bool
     {
         return Cache::forget($this->key);
+    }
+
+    /**
+     * Delete the key from the cache.
+     */
+    public function delete(): bool
+    {
+        return Cache::delete($this->key);
+    }
+
+    /**
+     * Retrieve the lock instance.
+     */
+    public function lock(int $seconds = 0, ?string $owner = null): Lock
+    {
+        return Cache::lock($this->key, $seconds, $owner);
+    }
+
+    /**
+     * Restore the lock instance using the owner identifier.
+     */
+    public function restoreLock(string $owner): Lock
+    {
+        return Cache::restoreLock($this->key, $owner);
     }
 }
