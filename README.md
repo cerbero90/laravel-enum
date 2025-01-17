@@ -32,7 +32,7 @@ composer require cerbero/laravel-enum
 * [🧺 Cases collection](#-cases-collection)
 * [🪄 Magic translation](#-magic-translation)
 * [💊 Encapsulation](#-encapsulation)
-  * [🗄️ Cache](#-cache)
+  * [🗄️ Cache](#%EF%B8%8F-cache)
   * [🔓 Session](#-session)
 * [🦾 Artisan commands](#-artisan-commands)
   * [🗒️ enum:annotate](#%EF%B8%8F-enumannotate)
