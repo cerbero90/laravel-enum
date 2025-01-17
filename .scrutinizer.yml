@@ -1,4 +1,6 @@
 build:
+    environment:
+        php: 8.2
     nodes:
         analysis:
             project_setup:
@@ -28,4 +30,3 @@ checks:
 tools:
     external_code_coverage:
         timeout: 600
-        runs: 3

@@ -1,15 +1,14 @@
 <?php
 
-namespace DummyNamespace;
+declare(strict_types=1);
 
-use Rexlabs\Enum\Enum;
+namespace {{ namespace }};
 
-/**
- * The DummyClass enum.
- *
-DummyMethodTags
- */
-class DummyClass extends Enum
+use Cerbero\LaravelEnum\Concerns\Enumerates;
+
+enum {{ name }}{{ backingType }}
 {
-DummyConstantsDummyMap
+    use Enumerates;
+
+{{ cases }}
 }

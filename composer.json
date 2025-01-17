@@ -1,11 +1,11 @@
 {
     "name": "cerbero/laravel-enum",
     "type": "library",
-    "description": "Enum generator for Laravel.",
+    "description": "Laravel package to supercharge enum functionalities.",
     "keywords": [
-        "cerbero",
-        "laravel-enum",
-        "enum"
+        "laravel",
+        "enum",
+        "enumeration"
     ],
     "homepage": "https://github.com/cerbero90/laravel-enum",
     "license": "MIT",
@@ -16,30 +16,42 @@
         "role": "Developer"
     }],
     "require": {
-        "php": "^7.1|^8.0",
-        "illuminate/console": ">=5.6",
-        "illuminate/support": ">=5.6",
-        "rexlabs/enum": "^2.0"
+        "php": "^8.1",
+        "cerbero/enum": "^2.3.1",
+        "illuminate/console": ">=9.0",
+        "illuminate/contracts": ">=9.0",
+        "illuminate/support": ">=9.0",
+        "laravel/prompts": ">=0.1"
     },
     "require-dev": {
-        "orchestra/testbench": ">=3.6",
-        "phpunit/phpunit": ">=7.0",
-        "squizlabs/php_codesniffer": "^3.0"
+        "orchestra/testbench": ">=7.0",
+        "pestphp/pest": "^2.0",
+        "phpstan/phpstan": "^2.0",
+        "scrutinizer/ocular": "^1.8",
+        "squizlabs/php_codesniffer": "^3.0",
+        "tightenco/duster": "^2.0"
     },
     "autoload": {
         "psr-4": {
             "Cerbero\\LaravelEnum\\": "src"
-        }
+        },
+        "files": [
+            "helpers/core.php",
+            "helpers/cli.php"
+        ]
     },
     "autoload-dev": {
         "psr-4": {
-            "Cerbero\\LaravelEnum\\": "tests"
+            "Cerbero\\LaravelEnum\\": "tests",
+            "App\\": "tests/Skeleton/app",
+            "Domain\\": "tests/Skeleton/domain",
+            "Unloaded\\": "tests/Skeleton/unloaded"
         }
     },
     "scripts": {
-        "test": "phpunit",
-        "check-style": "phpcs src tests",
-        "fix-style": "phpcbf src tests"
+        "fix": "duster fix -u tlint,phpcodesniffer,pint",
+        "lint": "duster lint -u tlint,phpcodesniffer,pint,phpstan",
+        "test": "pest"
     },
     "extra": {
         "branch-alias": {
@@ -52,6 +64,9 @@
         }
     },
     "config": {
-        "sort-packages": true
+        "sort-packages": true,
+        "allow-plugins": {
+            "pestphp/pest-plugin": true
+        }
     }
 }

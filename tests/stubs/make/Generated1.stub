@@ -1,0 +1,17 @@
+<?php
+
+declare(strict_types=1);
+
+namespace App\Enums;
+
+use Cerbero\LaravelEnum\Concerns\Enumerates;
+use Cerbero\LaravelEnum\Contracts\Bitwise;
+
+enum Generated1: int implements Bitwise
+{
+    use Enumerates;
+
+    case CaseOne = 1 << 0;
+
+    case CaseTwo = 1 << 1;
+}
