@@ -32,6 +32,8 @@ composer require cerbero/laravel-enum
 * [🧺 Cases collection](#-cases-collection)
 * [🪄 Magic translation](#-magic-translation)
 * [💊 Encapsulation](#-encapsulation)
+  * [🗄️ Cache](#-cache)
+  * [🔓 Session](#-session)
 * [🦾 Artisan commands](#-artisan-commands)
   * [🗒️ enum:annotate](#%EF%B8%8F-enumannotate)
   * [🏗️ enum:make](#%EF%B8%8F-enummake)
@@ -57,7 +59,7 @@ enum Numbers: int
 
 ### 🏷️ Meta
 
-Laravel Enum enhances [Enum's meta](https://github.com/cerbero90/enum?tab=readme-ov-file#%EF%B8%8F-meta) by allowing us to attach meta with a class name. Such class is resolved by the Laravel container when calling the related meta method:
+Laravel Enum extends [Enum's meta](https://github.com/cerbero90/enum?tab=readme-ov-file#%EF%B8%8F-meta) by allowing us to attach meta with a class name. This class is resolved by the Laravel container when invoking the corresponding meta method:
 
 ```php
 use Cerbero\Enum\Attributes\Meta;
@@ -77,7 +79,7 @@ enum PayoutStatuses
 }
 ```
 
-In the above enum, each case defines a `handler` meta with a class name. When a case calls its own `handler()` method, the related class is resolved by the IoC container:
+In the enum above, each case specifies a `handler` meta with a class name. When a case calls its `handler()` meta method, the corresponding class is resolved through the IoC container:
 
 ```php
 // 🐢 instead of this
@@ -94,7 +96,7 @@ return Container::getInstance()->make($handler);
 return $payout->status->handler();
 ```
 
-If we need to resolve a default class for most cases, we can attach the meta to the enum itself. The cases defining their own meta will override the default class:
+If we need to resolve a default class for most cases, we can attach the meta to the enum itself. Cases with their own meta override the default class:
 
 ```php
 use Cerbero\Enum\Attributes\Meta;
@@ -113,9 +115,9 @@ enum PayoutStatuses
 }
 ```
 
-In the above example all cases calling the `handler()` method resolve the `DefaultPayoutHandler` class, except for the `Sent` case that resolves `SentPayoutHandler`.
+In the example above, all cases calling the `handler()` method resolve the `DefaultPayoutHandler` class, except for the `Sent` case that resolves `SentPayoutHandler`.
 
-If the class to resolve is callable (i.e. it implements the `__invoke()` method), such class gets both resolved and executed:
+If the class to be resolved is callable (i.e., it implements the `__invoke()` method), that class will be both resolved and executed:
 
 ```php
 use Cerbero\Enum\Attributes\Meta;
@@ -124,18 +126,18 @@ enum PayoutStatuses
 {
     use Enumerates;
 
-    #[Meta(handle: SentPayoutHandler::class)]
+    #[Meta(handlePayout: SentPayoutHandler::class)]
     case Sent;
 
-    #[Meta(handle: OnHoldPayoutHandler::class)]
+    #[Meta(handlePayout: OnHoldPayoutHandler::class)]
     case OnHold;
 
-    #[Meta(handle: DeclinedPayoutHandler::class)]
+    #[Meta(handlePayout: DeclinedPayoutHandler::class)]
     case Declined;
 }
 ```
 
-In the above enum, each case defines a `handle` meta with a callable class. When a case calls its own `handle()` method, the related class gets resolved and its `__invoke()` method is executed with any parameter we pass:
+In the enum above, each case specifies a `handlePayout` meta with a callable class. When a case calls its `handlePayout()` method, the corresponding class is resolved and its `__invoke()` method is executed with any parameters passed:
 
 ```php
 // 🐢 instead of this
@@ -151,20 +153,20 @@ return $handlePayout($payout);
 
 
 // 🐇 we can do this
-return $payout->status->handle($payout);
+return $payout->status->handlePayout($payout);
 ```
 
-If we need to run a default callable class for most cases, we can attach the meta to the enum itself. The cases defining their own meta will override the default callable class:
+If we need to run a default callable class for most cases, we can attach the meta to the enum itself. Cases with their own meta override the default callable class:
 
 ```php
 use Cerbero\Enum\Attributes\Meta;
 
-#[Meta(handle: DefaultPayoutHandler::class)]
+#[Meta(handlePayout: DefaultPayoutHandler::class)]
 enum PayoutStatuses
 {
     use Enumerates;
 
-    #[Meta(handle: SentPayoutHandler::class)]
+    #[Meta(handlePayout: SentPayoutHandler::class)]
     case Sent;
 
     case OnHold;
@@ -173,26 +175,26 @@ enum PayoutStatuses
 }
 ```
 
-In the above example all cases calling the `handle()` method execute the `DefaultPayoutHandler` class, except for the `Sent` case that runs the `SentPayoutHandler`.
+In the example above, all cases calling the `handlePayout()` method execute the `DefaultPayoutHandler` class, except for the `Sent` case, which runs the `SentPayoutHandler`.
 
 > [!TIP]
 > Our IDE can autocomplete meta methods thanks to the [`enum:annotate` command](#%EF%B8%8F-enumannotate).
 >
-> Class names of a meta are annotated by finding the interface or parent class they have in common.
+> Class names in meta are annotated by identifying the common interface or parent class they share.
 
 
 ### 🧺 Cases collection
 
-The [original cases collection](https://github.com/cerbero90/enum?tab=readme-ov-file#-cases-collection) has been extended to better integrate with the Laravel framework.
+The [original cases collection](https://github.com/cerbero90/enum?tab=readme-ov-file#-cases-collection) has been extended for better integration with the Laravel framework.
 
 The new cases collection implements the `Illuminate\Contracts\Support\Arrayable` and `Illuminate\Contracts\Support\Jsonable` contracts and it can be serialized into a JSON.
 
 It also leverages the following Laravel traits:
-- `Illuminate\Support\Traits\Conditionable` to run conditions while keeping the methods chain
-- `Illuminate\Support\Traits\Macroable` to add methods to the collection at runtime
-- `Illuminate\Support\Traits\Tappable` to run custom logic while keeping the methods chain
+- `Illuminate\Support\Traits\Conditionable` for conditional chaining of methods
+- `Illuminate\Support\Traits\Macroable` for adding methods to the collection at runtime
+- `Illuminate\Support\Traits\Tappable` for running custom logic while keeping method chaining
 
-Furthermore the new collection allows us to `dump()` and `dd()` its cases:
+Additionally, the new collection enables us to `dump()` and `dd()` its cases:
 
 ```php
 Numbers::collect()->dump();
@@ -200,7 +202,7 @@ Numbers::collect()->dump();
 Numbers::collect()->dd();
 ```
 
-Cases collection can be cast in an Eloquent model to store multiple cases in one database column and to re-hydrate such cases back to a collection:
+Cases collection can be cast in an Eloquent model to store multiple cases in a single database column and then re-hydrate those cases back into a collection:
 
 ```php
 use Cerbero\LaravelEnum\CasesCollection;
@@ -222,7 +224,7 @@ class User extends Model
 }
 ```
 
-Once the cast is set, we can assign an array of names, values or cases to the `numbers` property of the model and receive back a cases collection when accessing the property:
+Once the cast is set, we can assign an array of names, values or cases to the `numbers` property of the model and receive a cases collection when accessing the property:
 
 ```php
 $user->numbers = ['One', 'Two'];
@@ -234,9 +236,9 @@ $user->numbers = [Numbers::One, Numbers::Two];
 $user->numbers; // CasesCollection[Numbers::One, Numbers::Two]
 ```
 
-The cases collection above is stored in the database as `["One","Two"]` if the enum is pure, or as `[1,2]` if the enum is backed.
+The cases collection above is stored in the database as `["One","Two"]` for a pure enum, or as `[1,2]` for a backed enum.
 
-The cast also supports bitwise backed enums, so for example if we have a `Permissions` enum implementing the `Bitwise` contract:
+The cast also supports bitwise backed enums, so for instance, if we have a `Permissions` enum implementing the `Bitwise` contract:
 
 ```php
 use Cerbero\LaravelEnum\Contracts\Bitwise;
@@ -251,7 +253,7 @@ enum Permissions: int implements Bitwise
 }
 ```
 
-and we cast the permissions in our Eloquent model:
+and we cast the `permissions` property in our Eloquent model:
 
 ```php
 use Cerbero\LaravelEnum\CasesCollection;
@@ -273,7 +275,7 @@ class User extends Model
 }
 ```
 
-we can assign a bitwise value or an array of bitwise values/cases to the `permissions` property and receive back a cases collection:
+we can assign a bitwise value or an array of bitwise values/cases to the `permissions` property and receive a cases collection in return:
 
 ```php
 $user->permissions = 3;
@@ -293,7 +295,7 @@ The cases collection above is stored in the database as `3`, the result of the `
 
 ### 🪄 Magic translation
 
-On top of [Enum's magic](https://github.com/cerbero90/enum?tab=readme-ov-file#-magic), when a case calls an inaccessible method, and such case has no matching [meta](https://github.com/cerbero90/enum?tab=readme-ov-file#%EF%B8%8F-meta), Laravel Enum assumes that we want to access a translation:
+On top of [Enum's magic](https://github.com/cerbero90/enum?tab=readme-ov-file#-magic), when a case calls an inaccessible method without a corresponding [meta](#%EF%B8%8F-meta) match, Laravel Enum assumes that we want to access a translation:
 
 ```php
 Numbers::One->description();
@@ -308,7 +310,7 @@ return [
 ];
 ```
 
-By default the translation key is resolved with `enums.{enum namespace}.{case name}.{inaccessible method}`. If needed, we can customize the translation key:
+By default the translation key is resolved as `enums.{enum namespace}.{case name}.{inaccessible method}`. If customization is needed, we can adjust the translation key:
 
 ```php
 use Cerbero\LaravelEnum\Enums;
@@ -318,9 +320,9 @@ Enums::translateFrom(function(UnitEnum $case, string $method) {
 });
 ```
 
-The above logic will resolve the translation key with `custom.{enum namespace}.{case name}.{inaccessible method}`.
+The above logic will resolve the translation key as `custom.{enum namespace}.{case name}.{inaccessible method}`.
 
-Also, we can pass named arguments to replace placeholders in our translations:
+Additionally, we can pass named arguments to replace placeholders within our translations:
 
 ```php
 return [
@@ -341,58 +343,19 @@ Numbers::One->description(value: 1);
 
 ### 💊 Encapsulation
 
-Laravel Enum offers some extra traits to encapsulate Laravel features that deal with keys. We can hold our keys in an enum (each case is a key) and use Laravel features without ever having to repeat such keys.
+Laravel Enum offers extra traits to encapsulate Laravel features that deal with keys. By defining keys as enum cases, we can leverage Laravel features without having to remember or repeat such keys.
 
 The benefits of this approach are many:
-- no flaky strings around our codebase
-- no keys misspelling
-- IDE autocompletion
-- reviewing/managing all our application keys in a central location
-- updating keys in one file only instead of replacing all their occurrences
+- avoiding scattered, error-prone strings throughout the codebase
+- preventing key misspellings
+- enabling IDE autocompletion
+- reviewing all application keys in a central location
+- updating keys in one place rather than replacing all instances
 
-To encapsulate the Laravel session, we can create a backed enum holding all our session keys and let it use the `EnumeratesSessionKeys` trait:
 
-```php
-use Cerbero\LaravelEnum\Concerns\EnumeratesSessionKeys;
+#### 🗄️ Cache
 
-enum SessionKeys
-{
-    use EnumeratesSessionKeys;
-
-    case CartItems = 'cart-items';
-    case OnboardingStep = 'onboarding-step';
-    case FormsData = 'forms.{int $formId}.data';
-}
-```
-
-The `EnumeratesSessionKeys` trait also uses `Enumerates`, hence all the features of this package. We can now leverage all the Laravel session methods after statically calling our enum cases:
-
-```php
-SessionKeys::CartItems()->exists();
-SessionKeys::CartItems()->missing();
-SessionKeys::CartItems()->hasValue();
-SessionKeys::CartItems()->get($default);
-SessionKeys::CartItems()->pull($default);
-SessionKeys::CartItems()->hasOldInput();
-SessionKeys::CartItems()->getOldInput($default);
-SessionKeys::CartItems()->put($value);
-SessionKeys::CartItems()->remember($callback);
-SessionKeys::CartItems()->push($value);
-SessionKeys::CartItems()->increment($amount);
-SessionKeys::CartItems()->decrement($amount);
-SessionKeys::CartItems()->flash($value);
-SessionKeys::CartItems()->now($value);
-SessionKeys::CartItems()->remove();
-SessionKeys::CartItems()->forget();
-```
-
-When statically calling our cases, we can pass parameters to resolve dynamic keys. Such parameters replace the `{...}` placeholders in the session keys:
-
-```php
-SessionKeys::FormsData($formId)->exists();
-```
-
-To encapsulate the Laravel cache, we can create a backed enum holding all our cache keys and let it use the `EnumeratesCacheKeys` trait:
+To encapsulate the Laravel cache, we can define a backed enum with all our cache keys and apply the `EnumeratesCacheKeys` trait:
 
 ```php
 use Cerbero\LaravelEnum\Concerns\EnumeratesCacheKeys;
@@ -407,7 +370,7 @@ enum CacheKeys: string
 }
 ```
 
-The `EnumeratesCacheKeys` trait also uses `Enumerates`, hence all the features of this package. We can now leverage all the Laravel cache methods after statically calling our enum cases:
+The `EnumeratesCacheKeys` trait incorporates `Enumerates`, hence all the features of this package. We can now leverage all the Laravel cache methods by statically calling enum cases:
 
 ```php
 CacheKeys::Tags()->exists();
@@ -430,37 +393,74 @@ CacheKeys::Tags()->lock($seconds, $owner);
 CacheKeys::Tags()->restoreLock($owner);
 ```
 
-When statically calling our cases, we can pass parameters to resolve dynamic keys. Such parameters replace the `{...}` placeholders in the cache keys:
+When calling cases statically, we can pass parameters to resolve dynamic keys. Such parameters replace the `{...}` placeholders in the cache keys:
 
 ```php
 CacheKeys::TeamMemberPosts($teamId, $userId)->exists();
 ```
 
+
+#### 🔓 Session
+
+To encapsulate the Laravel session, we can define a backed enum with all our session keys and apply the `EnumeratesSessionKeys` trait:
+
+```php
+use Cerbero\LaravelEnum\Concerns\EnumeratesSessionKeys;
+
+enum SessionKeys
+{
+    use EnumeratesSessionKeys;
+
+    case CartItems = 'cart-items';
+    case OnboardingStep = 'onboarding-step';
+    case FormsData = 'forms.{int $formId}.data';
+}
+```
+
+The `EnumeratesSessionKeys` trait incorporates `Enumerates`, hence all the features of this package. We can now leverage all the Laravel session methods by statically calling enum cases:
+
+```php
+SessionKeys::CartItems()->exists();
+SessionKeys::CartItems()->missing();
+SessionKeys::CartItems()->hasValue();
+SessionKeys::CartItems()->get($default);
+SessionKeys::CartItems()->pull($default);
+SessionKeys::CartItems()->hasOldInput();
+SessionKeys::CartItems()->getOldInput($default);
+SessionKeys::CartItems()->put($value);
+SessionKeys::CartItems()->remember($callback);
+SessionKeys::CartItems()->push($value);
+SessionKeys::CartItems()->increment($amount);
+SessionKeys::CartItems()->decrement($amount);
+SessionKeys::CartItems()->flash($value);
+SessionKeys::CartItems()->now($value);
+SessionKeys::CartItems()->remove();
+SessionKeys::CartItems()->forget();
+```
+
+When calling cases statically, we can pass parameters to resolve dynamic keys. Such parameters replace the `{...}` placeholders in the session keys:
+
+```php
+SessionKeys::FormsData($formId)->exists();
+```
+
 > [!TIP]
-> Our IDE can autocomplete cache keys static methods thanks to the [`enum:annotate` command](#%EF%B8%8F-enumannotate).
+> Our IDE can autocomplete case static methods thanks to the [`enum:annotate` command](#%EF%B8%8F-enumannotate).
 
 
 ### 🦾 Artisan commands
 
 A handy set of Artisan commands is provided out of the box to interact with enums seamlessly.
 
-Some commands generate enums or related files. If we want to customize such files, we can publish the stubs:
+Some commands generate enums or related files. If we want to customize such files, we can publish their stubs:
 
 ```bash
 php artisan vendor:publish --tag=laravel-enum-stubs
 ```
 
-The stubs can then be modified in the `stubs/laravel-enum` directory, in the root of our application.
+After publishing, the stubs can be modified within the `stubs/laravel-enum` directory, located at the root of our application.
 
-#### 🗒️ enum:annotate
-
-IDEs can autocomplete case methods, meta methods, translations, etc. by running the `enum:annotate` command:
-
-```bash
-php artisan enum:annotate
-```
-
-If we don't provide any argument, a prompt appears to select all the enums that we want to annotate. By default enums get searched in the `app/Enums` directory. If need be, we can scan other folders:
+Certain commands supports the `--all` option to reference all enums in our application. By default, enums are searched in the `app/Enums` directory, but we can scan other folders as well:
 
 ```php
 use Cerbero\LaravelEnum\Enums;
@@ -474,9 +474,17 @@ class AppServiceProvider extends ServiceProvider
 }
 ```
 
-In the above example, enums are searched in the `app/Enums` directory and in all `Enums` sub-folders belonging to `domain`, e.g. `domain/Posts/Enums`, `domain/Users/Enums`, etc.
+In the example above, enums are searched in the `app/Enums` directory and all `Enums` sub-directories within `domain`, such as `domain/Posts/Enums`, `domain/Users/Enums`, etc.
 
-To annotate all the enums in the directories defined in `Enums::setPaths()`, we can simply add the `--all` option:
+#### 🗒️ enum:annotate
+
+IDEs can autocomplete case static methods, meta methods, translations, etc. by running the `enum:annotate` command:
+
+```bash
+php artisan enum:annotate
+```
+
+If we don't provide any argument, a prompt appears to choose which enums to annotate. Or, we can simply use the `--all` option to annotate all enums:
 
 ```bash
 php artisan enum:annotate --all
@@ -484,13 +492,13 @@ php artisan enum:annotate --all
 php artisan enum:annotate -a
 ```
 
-Alternatively we can provide one or more enums to the `enum:annotate` command. Both slashes and quoted backslashes are allowed to specify the enum namespaces:
+Alternatively, we can provide one or more enums directly to the `enum:annotate` command. Both slashes and quoted backslashes are acceptable for defining enum namespaces:
 
 ```bash
 php artisan enum:annotate App/Enums/Permissions "App\Enums\PayoutStatuses"
 ```
 
-Finally if we want to overwrite the method annotations already annotated on enums, we can add the option `--force`:
+Lastly, if we wish to overwrite existing method annotations on enums, we can include the `--force` option:
 
 ```bash
 php artisan enum:annotate --force
@@ -500,13 +508,13 @@ php artisan enum:annotate -f
 
 #### 🏗️ enum:make
 
-The `enum:make` command creates a new - automatically annotated - enum with the cases that we provide:
+The `enum:make` command allows us to create a new, automatically annotated enum with the cases we need:
 
 ```bash
 php artisan enum:make
 ```
 
-If we don't provide any argument, prompts appear to let us define the enum namespace, backing type and cases. Otherwise we can specify all of them via command line:
+If no arguments are given, prompts will guide us through defining the enum namespace, backing type and cases. Otherwise, all these details can be typed via command line:
 
 ```bash
 php artisan enum:make App/Enums/Enum CaseOne CaseTwo
@@ -514,30 +522,30 @@ php artisan enum:make App/Enums/Enum CaseOne CaseTwo
 php artisan enum:make "App\Enums\Enum" CaseOne CaseTwo
 ```
 
-If we need to create backed enums, we can specify a custom value for each case:
+For creating backed enums, we can manually set custom values for each case:
 
 ```bash
 php artisan enum:make App/Enums/Enum CaseOne=value1 CaseTwo=value2
 ```
 
-Otherwise we can automatically assign values to cases by setting the `--backed` option:
+Or, we can automatically assign values to cases by using the `--backed` option:
 
 ```bash
 php artisan enum:make App/Enums/Enum CaseOne CaseTwo --backed=int0
 ```
 
-The option `--backed` supports the following values:
+The `--backed` option accepts these values:
 
-- `int0`: assign an incremental integer starting from 0 (0, 1, 2...)
-- `int1`: assign an incremental integer starting from 1 (1, 2, 3...)
-- `bitwise`: assign an incremental bitwise value (1, 2, 4...)
-- `snake`: assign the case name in snake case (case_one, case_two...)
-- `kebab`: assign the case name in kebab case (case-one, case-two...)
-- `camel`: assign the case name in camel case (caseOne, caseTwo...)
-- `lower`: assign the case name in lower case (caseone, casetwo...)
-- `upper`: assign the case name in upper case (CASEONE, CASETWO...)
+- `int0`: assigns incremental integers starting from 0 (0, 1, 2...)
+- `int1`: assigns incremental integers starting from 1 (1, 2, 3...)
+- `bitwise`: assigns incremental bitwise values (1, 2, 4...)
+- `snake`: assigns the case name in snake case (case_one, case_two...)
+- `kebab`: assigns the case name in kebab case (case-one, case-two...)
+- `camel`: assigns the case name in camel case (caseOne, caseTwo...)
+- `lower`: assigns the case name in lower case (caseone, casetwo...)
+- `upper`: assigns the case name in upper case (CASEONE, CASETWO...)
 
-If we want to overwrite an existing enum, we can add the option `--force`:
+To overwrite an existing enum, we can include the `--force` option:
 
 ```bash
 php artisan enum:make App/Enums/Enum CaseOne CaseTwo --force
@@ -555,29 +563,13 @@ php artisan enum:make App/Enums/Enum CaseOne CaseTwo -t
 
 #### 💙 enum:ts
 
-The `ts` command turns enums into their TypeScript counterpart, synchronizing backend with frontend:
+The `ts` command converts enums to their TypeScript equivalents, ensuring backend and frontend synchronization:
 
 ```bash
 php artisan enum:ts
 ```
 
-If we don't provide any argument, a prompt appears to select all the enums that we want to synchronize. By default enums get searched in the `app/Enums` directory. If we need to scan other folders, we can define them by calling `Enums::setPaths()`:
-
-```php
-use Cerbero\LaravelEnum\Enums;
-
-class AppServiceProvider extends ServiceProvider
-{
-    public function boot(): void
-    {
-        Enums::setPaths('app/Enums', 'domain/*/Enums');
-    }
-}
-```
-
-In the above example, enums are searched in the `app/Enums` directory and in all `Enums` sub-folders belonging to `domain`, e.g. `domain/Posts/Enums`, `domain/Users/Enums`, etc.
-
-To synchronize all the enums in the directories defined in `Enums::setPaths()`, we can simply add the `--all` option:
+If we don't provide any argument, a prompt appears to choose which enums to synchronize. Or, we can simply use the `--all` option to synchronize all enums:
 
 ```bash
 php artisan enum:ts --all
@@ -585,13 +577,13 @@ php artisan enum:ts --all
 php artisan enum:ts -a
 ```
 
-Alternatively we can provide one or more enums to the `enum:ts` command. Both slashes and quoted backslashes are allowed to specify the enum namespaces:
+Alternatively, we can provide one or more enums directly to the `enum:ts` command. Both slashes and quoted backslashes are acceptable for defining enum namespaces:
 
 ```bash
 php artisan enum:ts App/Enums/Permissions "App\Enums\PayoutStatuses"
 ```
 
-By default enums are synchronized in `resources/js/enums/index.ts`, however we can customize it in our `enums.php` configuration file:
+By default, enums are synchronized to `resources/js/enums/index.ts`, but this can be easily customized:
 
 ```php
 use Cerbero\LaravelEnum\Enums;
@@ -613,9 +605,9 @@ class AppServiceProvider extends ServiceProvider
 }
 ```
 
-As seen above, we can either set a static path for our TypeScript enums or dynamically set the TypeScript path of an enum depending on its namespace.
+As shown above, we can either define a static path for TypeScript enums or dynamically set the TypeScript path for an enum based on its namespace.
 
-Finally if we want to update previously synchronized enums, we can add the option `--force`:
+To update enums that have already been synchronized, we can use the `--force` option:
 
 ```bash
 php artisan enum:ts App/Enums/Enum --force
