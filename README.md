@@ -117,7 +117,7 @@ enum PayoutStatuses
 
 In the example above, all cases calling the `handler()` method resolve the `DefaultPayoutHandler` class, except for the `Sent` case that resolves `SentPayoutHandler`.
 
-If the class to be resolved is callable (i.e., it implements the `__invoke()` method), that class will be both resolved and executed:
+If the class to be resolved is callable (i.e. it implements the `__invoke()` method), that class will be both resolved and executed:
 
 ```php
 use Cerbero\Enum\Attributes\Meta;
@@ -137,7 +137,7 @@ enum PayoutStatuses
 }
 ```
 
-In the enum above, each case specifies a `handlePayout` meta with a callable class. When a case calls its `handlePayout()` method, the corresponding class is resolved and its `__invoke()` method is executed with any parameters passed:
+In the enum above, each case specifies a `handlePayout` meta with a callable class. Calling `handlePayout()` resolves and invokes the class with any passed parameters.
 
 ```php
 // 🐢 instead of this
@@ -224,7 +224,7 @@ class User extends Model
 }
 ```
 
-Once the cast is set, we can assign an array of names, values or cases to the `numbers` property of the model and receive a cases collection when accessing the property:
+Once the cast is set, we can assign an array of names, values or cases to the cast property of the model and receive a cases collection when accessing the property:
 
 ```php
 $user->numbers = ['One', 'Two'];
