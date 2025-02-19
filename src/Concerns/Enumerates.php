@@ -6,7 +6,6 @@ namespace Cerbero\LaravelEnum\Concerns;
 
 use Cerbero\Enum\Concerns\Compares;
 use Cerbero\Enum\Concerns\Hydrates;
-use Cerbero\Enum\Concerns\SelfAware;
 
 /**
  * The trait to supercharge the functionalities of an enum.

@@ -13,6 +13,10 @@ it('translates with placeholders', function() {
     expect(BackedEnum::One->dynamic(value: 123))->toBe('The value is 123');
 });
 
+it('translates when resolving an item', function() {
+    expect(BackedEnum::One->resolveItem('description'))->toBe('My description');
+});
+
 it('translates from custom keys', function() {
     Enums::translateFrom(fn(UnitEnum $case, string $method) => "custom.{$case->name}.{$method}");
 
@@ -25,6 +29,9 @@ it('fails if translation values are not passed as named arguments', fn() => Back
     ->throws(InvalidArgumentException::class, 'The method Cerbero\LaravelEnum\BackedEnum::One->dynamic() must be called with its named arguments');
 
 it('fails if a translation cannot be found', fn() => BackedEnum::One->unknownTranslation())
+    ->throws(ValueError::class, 'The case Cerbero\LaravelEnum\BackedEnum::One has no "unknownTranslation" meta set');
+
+it('fails if a translation cannot be found when resolving an item', fn() => BackedEnum::One->resolveItem('unknownTranslation'))
     ->throws(ValueError::class, 'The case Cerbero\LaravelEnum\BackedEnum::One has no "unknownTranslation" meta set');
 
 it('handles the call to an inaccessible enum method', function() {
