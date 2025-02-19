@@ -26,6 +26,15 @@ Updates should follow the [Keep a CHANGELOG](http://keepachangelog.com/) princip
 - Nothing
 
 
+## 2.1.0 - 2025-02-19
+
+### Added
+- Attempt to resolve translations when an item of a case cannot be resolved
+
+### Changed
+- Require the latest version of the package Enum
+
+
 ## 2.0.0 - 2025-01-17
 
 ### Added
