@@ -337,6 +337,20 @@ return [
 Numbers::One->description(value: 1);
 ```
 
+Translations are accessible through [enum operations](https://github.com/cerbero90/enum?tab=readme-ov-file#-enum-operations) as well:
+
+```php
+$options = Numbers::pluck('description', 'value');
+
+/*
+[
+    1 => 'This is the case One.',
+    2 => 'This is the case Two.',
+    3 => 'This is the case Three.',
+]
+*/
+```
+
 > [!TIP]
 > Our IDE can autocomplete translation methods thanks to the [`enum:annotate` command](#%EF%B8%8F-enumannotate).
 
