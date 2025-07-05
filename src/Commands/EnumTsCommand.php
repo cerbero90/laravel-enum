@@ -48,7 +48,7 @@ final class EnumTsCommand extends Command
         $succeeded = true;
         $force = !! $this->option('force');
 
-        foreach($enums as $enum) {
+        foreach ($enums as $enum) {
             $succeeded = output($this->output, $enum, fn() => (new TypeScript($enum))->sync($force)) && $succeeded;
         }
 
