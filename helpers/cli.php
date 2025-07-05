@@ -61,7 +61,7 @@ function runEnum(string $command): bool
 
     ob_start();
 
-    $succeeded = passthru($cmd, $status) === null;
+    $succeeded = passthru($cmd) === null;
 
     ob_end_clean();
 
