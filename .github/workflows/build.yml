@@ -67,7 +67,7 @@ jobs:
               uses: codacy/codacy-analysis-cli-action@master
               with:
                   project-token: ${{ secrets.CODACY_REPO_TOKEN }}
-                  directory: /github/workspace/src
+                  directory: src
                   upload: true
                   verbose: true
                   max-allowed-issues: 2147483647
