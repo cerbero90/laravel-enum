@@ -48,7 +48,7 @@ final class EnumAnnotateCommand extends Command
         $succeeded = true;
         $force = !! $this->option('force');
 
-        foreach($enums as $enum) {
+        foreach ($enums as $enum) {
             $succeeded = output($this->output, $enum, fn() => (new Annotator($enum))->annotate($force)) && $succeeded;
         }
 

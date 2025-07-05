@@ -1,5 +1,6 @@
 <?php
 
+use Illuminate\Foundation\Application;
 use Laravel\Prompts\TextareaPrompt;
 
 it('succeeds if an enum already exists', function() {
@@ -39,6 +40,10 @@ it('generates enums with prompts', function() {
     $command = $this->artisan('enum:make')
         ->expectsQuestion('The namespace of the enum', 'App\Enums\Generated1')
         ->expectsQuestion('How cases should be backed', 'bitwise');
+
+    if (intval(Application::VERSION) > 10) {
+        $command->expectsQuestion('The cases (one per line)', 'CaseOne' . PHP_EOL . 'CaseTwo');
+    }
 
     expect($command)->toGenerate('App\Enums\Generated1');
 });

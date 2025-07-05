@@ -1,6 +1,7 @@
 <?php
 
 use Cerbero\LaravelEnum\CacheKeys;
+use Illuminate\Cache\Repository;
 use Illuminate\Contracts\Cache\Lock;
 use Illuminate\Support\Facades\Cache;
 
@@ -93,6 +94,21 @@ it('supports the sear() method', function() {
 
     expect(CacheKeys::PinnedPosts(123, 'abc')->sear(fn() => 'foo'))->toBe('foo');
 });
+
+it('supports the flexible() method', function() {
+    $expectedCallback = Mockery::on(fn(Closure $callback) => $callback() === 'foo');
+
+    Cache::shouldReceive('flexible')
+        ->with('teams.123.users.abc.pinned_posts', [1, 2], $expectedCallback, ['seconds' => 3], true)
+        ->andReturn('foo');
+
+    expect(CacheKeys::PinnedPosts(123, 'abc')->flexible([1, 2], fn() => 'foo', ['seconds' => 3], true))->toBe('foo');
+})->skip(fn() => ! method_exists(Repository::class, 'flexible'));
+
+it('fails to call the flexible() method if the Laravel version is incompatible', function() {
+    expect(fn() => CacheKeys::PinnedPosts(123, 'abc')->flexible([1, 2], fn() => 'foo'))
+        ->toThrow(new RuntimeException('Laravel 11 or later is required for flexible caching'));
+})->skip(fn() => method_exists(Repository::class, 'flexible'));
 
 it('supports the forget() method', function() {
     Cache::shouldReceive('forget')->with('teams.123.users.abc.pinned_posts')->andReturn(true);
