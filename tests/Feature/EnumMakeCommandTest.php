@@ -38,7 +38,8 @@ it('generates enums with prompts', function() {
 
     $command = $this->artisan('enum:make')
         ->expectsQuestion('The namespace of the enum', 'App\Enums\Generated1')
-        ->expectsQuestion('How cases should be backed', 'bitwise');
+        ->expectsQuestion('How cases should be backed', 'bitwise')
+        ->expectsQuestion('The cases (one per line)', 'CaseOne' . PHP_EOL . 'CaseTwo');
 
     expect($command)->toGenerate('App\Enums\Generated1');
 });
