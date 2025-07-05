@@ -153,6 +153,7 @@ final class CacheKey
      */
     public function flexible(array $ttl, callable $callback, ?array $lock = null, bool $alwaysDefer = false): mixed
     {
+        /** @phpstan-ignore-next-line function.alreadyNarrowedType */
         if (method_exists(Repository::class, __FUNCTION__)) {
             /** @phpstan-ignore-next-line arguments.count */
             return Cache::flexible($this->key, $ttl, $callback, $lock, $alwaysDefer);
