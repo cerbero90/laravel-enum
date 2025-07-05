@@ -14,7 +14,7 @@ use RuntimeException;
 
 /**
  * The key dealing with the Laravel cache.
-
+ *
  * @template TCacheValue
  */
 final class CacheKey
