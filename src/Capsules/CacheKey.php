@@ -158,8 +158,7 @@ final class CacheKey
             return Cache::flexible($this->key, $ttl, $callback, $lock, $alwaysDefer);
         }
 
-        /** @codeCoverageIgnore */
-        throw new RuntimeException('Laravel 11 or later is required for flexible caching');
+        throw new RuntimeException('Laravel 11 or later is required for flexible caching'); // @codeCoverageIgnore
     }
 
     /**
