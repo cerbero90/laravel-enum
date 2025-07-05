@@ -7,11 +7,15 @@ namespace Cerbero\LaravelEnum\Capsules;
 use Closure;
 use DateInterval;
 use DateTimeInterface;
+use Illuminate\Cache\Repository;
 use Illuminate\Contracts\Cache\Lock;
 use Illuminate\Support\Facades\Cache;
+use RuntimeException;
 
 /**
  * The key dealing with the Laravel cache.
+
+ * @template TCacheValue
  */
 final class CacheKey
 {
@@ -113,6 +117,8 @@ final class CacheKey
 
     /**
      * Retrieve or store the value of the key.
+     *
+     * @param Closure(): TCacheValue $callback
      */
     public function remember(Closure|DateTimeInterface|DateInterval|int|null $ttl, Closure $callback): mixed
     {
@@ -121,6 +127,8 @@ final class CacheKey
 
     /**
      * Retrieve or store indefinitely the value of the key.
+     *
+     * @param Closure(): TCacheValue $callback
      */
     public function rememberForever(Closure $callback): mixed
     {
@@ -133,6 +141,23 @@ final class CacheKey
     public function sear(Closure $callback): mixed
     {
         return Cache::sear($this->key, $callback);
+    }
+
+    /**
+     * Retrieve the value of the key, refreshing it in the background if it is stale.
+     *
+     * @param array{ 0: \DateTimeInterface|\DateInterval|int, 1: \DateTimeInterface|\DateInterval|int } $ttl
+     * @param callable(): TCacheValue $callback
+     * @param array{ seconds?: int, owner?: string }|null $lock
+     * @return TCacheValue
+     */
+    public function flexible(array $ttl, callable $callback, ?array $lock = null, bool $alwaysDefer = false): mixed
+    {
+        if (method_exists(Repository::class, __FUNCTION__)) {
+            return Cache::flexible($this->key, $ttl, $callback, $lock, $alwaysDefer);
+        }
+
+        throw new RuntimeException('Laravel 11 or later is required for flexible caching');
     }
 
     /**
