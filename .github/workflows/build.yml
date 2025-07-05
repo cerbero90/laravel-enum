@@ -61,12 +61,22 @@ jobs:
               run: composer update --prefer-stable --prefer-dist --no-interaction
 
             - name: Execute tests
-              run: vendor/bin/pest --coverage-text --coverage-clover=coverage.xml --log-junit tests-report.xml
+              run: vendor/bin/pest --coverage-text --coverage-clover=coverage.xml
 
-            - name: SonarQube Scan
-              uses: SonarSource/sonarqube-scan-action@v5
-              env:
-                  SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+            - name: Run Codacy Analysis CLI
+              uses: codacy/codacy-analysis-cli-action@master
+              with:
+                  project-token: ${{ secrets.CODACY_REPO_TOKEN }}
+                  directory: src
+                  upload: true
+                  verbose: true
+                  max-allowed-issues: 2147483647
+
+            - name: Run Codacy Coverage Reporter
+              uses: codacy/codacy-coverage-reporter-action@v1.3.0
+              with:
+                  project-token: ${{ secrets.CODACY_REPO_TOKEN }}
+                  coverage-reports: coverage.xml
 
     linting:
         runs-on: ubuntu-latest
