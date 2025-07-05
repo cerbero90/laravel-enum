@@ -26,6 +26,12 @@ Updates should follow the [Keep a CHANGELOG](http://keepachangelog.com/) princip
 - Nothing
 
 
+## 2.2.0 - 2025-07-05
+
+### Added
+- Support for the `flexible()` caching method
+
+
 ## 2.1.0 - 2025-02-19
 
 ### Added
